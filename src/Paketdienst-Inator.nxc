@@ -1,0 +1,132 @@
+// PID line follower - NXC (corrected)
+// Sensors: S1 = left light, S2 = right light
+// Motors:  OUT_B = left, OUT_C = right
+
+#define LEFT_SENSOR  S1
+#define RIGHT_SENSOR S2
+#define LEFT_MOTOR   OUT_B
+#define RIGHT_MOTOR  OUT_C
+
+#define ERROR_SCALE 100.0      // divide raw error by this to normalize (~ -1..1)
+#define POWER_RANGE 100        // motor power range 0..100
+
+// PID gains - start conservative and tune
+float kp = 1.2;
+float ki = 0.01;
+float kd = 0.04;
+
+// derivative filter time constant (seconds)
+const float DERIV_TAU = 0.02;
+
+// runtime state
+float integral = 0.0;
+float lastError = 0.0;
+float derivative = 0.0;
+
+// base forward power and timing
+int base_speed = 40;                 // 0..100
+const float update_time = 0.01;      // seconds
+const int LOOP_MS = (int)(update_time * 1000); // integer ms for Sleep()
+const int INTEGRAL_LIMIT = 30;       // tune later (see notes)
+
+// helper: clamp integer
+int clampInt(int v, int lo, int hi) {
+  if (v < lo) return lo;
+  if (v > hi) return hi;
+  return v;
+}
+
+// helper: apply signed power to motor (handles direction)
+void applyMotorPower(int motorPort, int signedPower) {
+  int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
+  if (p > 0) {
+    OnFwd(motorPort, p);
+  } else if (p < 0) {
+    OnRev(motorPort, -p);
+  } else {
+    Off(motorPort);
+  }
+}
+
+// OPTIONAL: very small slew rate limiter (prevents instant jumps)
+int limitDelta(int prev, int target, int maxDelta) {
+  int d = target - prev;
+  if (d > maxDelta) d = maxDelta;
+  if (d < -maxDelta) d = -maxDelta;
+  return prev + d;
+}
+
+task main() {
+  // configure sensors as light sensors
+  SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
+  SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
+
+  // OPTIONAL: initial read to initialize lastError / derivative
+  int l0 = SensorValue(LEFT_SENSOR);
+  int r0 = SensorValue(RIGHT_SENSOR);
+  float initError = ((float)l0 - (float)r0) / ERROR_SCALE;
+  lastError = initError;
+  derivative = 0.0;
+  integral = 0.0;
+
+  // previous applied power for slew limiting
+  int prevLeftApplied = 0;
+  int prevRightApplied = 0;
+  const int MAX_DELTA_PER_LOOP = 8; // tune
+
+  while(true) {
+    // read sensors (0..100 typical)
+    int leftRaw  = SensorValue(LEFT_SENSOR);
+    int rightRaw = SensorValue(RIGHT_SENSOR);
+
+    // compute normalized error: positive => line more on left
+    float error = ((float)leftRaw - (float)rightRaw) / ERROR_SCALE;
+
+    // integral update with clamp (anti-windup)
+    integral += error * update_time;
+    if (integral > INTEGRAL_LIMIT) integral = INTEGRAL_LIMIT;
+    if (integral < -INTEGRAL_LIMIT) integral = -INTEGRAL_LIMIT;
+
+    // raw derivative
+    float rawD = (error - lastError) / update_time;
+
+    // derivative low-pass filter
+    float alpha = update_time / (DERIV_TAU + update_time);
+    derivative = derivative * (1.0 - alpha) + rawD * alpha;
+
+    // PID steering (signed - usually small, ~ -1..1)
+    float steering = kp * error + ki * integral + kd * derivative;
+
+    // map steering to motor power
+    int leftPower  = (int)(base_speed + steering * POWER_RANGE);
+    int rightPower = (int)(base_speed - steering * POWER_RANGE);
+
+    // clamp motor outputs
+    leftPower  = clampInt(leftPower, -POWER_RANGE, POWER_RANGE);
+    rightPower = clampInt(rightPower, -POWER_RANGE, POWER_RANGE);
+
+    // anti-windup (simple): if we saturated, undo last integral step
+    // (compare unsaturated desired to saturated)
+    // unsat values:
+    float unsatLeft = base_speed + steering * POWER_RANGE;
+    float unsatRight = base_speed - steering * POWER_RANGE;
+    if ((unsatLeft != leftPower) || (unsatRight != rightPower)) {
+      // undo last integral addition
+      integral -= error * update_time;
+    }
+
+    // optionally limit rate of change (slew)
+    int appliedLeft = limitDelta(prevLeftApplied, leftPower, MAX_DELTA_PER_LOOP);
+    int appliedRight = limitDelta(prevRightApplied, rightPower, MAX_DELTA_PER_LOOP);
+    prevLeftApplied = appliedLeft;
+    prevRightApplied = appliedRight;
+
+    // apply to motors (handles forward/reverse)
+    applyMotorPower(LEFT_MOTOR, appliedLeft);
+    applyMotorPower(RIGHT_MOTOR, appliedRight);
+
+    // store for next loop
+    lastError = error;
+    Sleep(LOOP_MS);
+  } // while
+} // task main
