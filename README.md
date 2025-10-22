@@ -78,6 +78,29 @@ MAX_DELTA_PER_LOOP = 8
 
 ---
 
+## To‑Do / Improvements by Priority
+
+### High Priority
+
+* **Sensor calibration (white/black normalization)** → ensures stable values across lighting conditions.
+* **Sensor smoothing / moving average** → reduces noise and jitter in PID input.
+* **Speed adaptation in curves** → slow down slightly when error is large for smoother turning.
+
+### Medium Priority
+
+* **Clean anti-windup logic** → stop integrating when output is saturated.
+* **Adaptive derivative scaling** → reduce `kd` effect when error is large (less jitter in sharp curves).
+* **Dynamic error scaling** → increase steering response only when far from the line.
+
+###  Optional / Advanced
+
+* **Add 3rd (middle) sensor** → improves robustness and helps recover lost line.
+* **Lost-line detection and recovery** → detect when both sensors see white/black and re-center.
+* **Debug output (display/log)** → print `error`, `steering`, `integral` for easy tuning.
+* **Encoder feedback** → use wheel encoders for cascaded inner speed control.
+
+---
+
 ## Next steps / improvements
 
 * Add sensor calibration (white/black normalization).
@@ -86,18 +109,4 @@ MAX_DELTA_PER_LOOP = 8
 * Add intersection handling and lost-line recovery behaviors.
 * Add a small calibration program and logging to help tuning.
 
----
 
-## License
-
-MIT
-
----
-
-If you want, I can also add:
-
-* the full NXC source file into the repo,
-* a calibration helper program, or
-* a short `CONTRIBUTING.md` with your preferred workflow.
-
-Which would you like me to add next?
