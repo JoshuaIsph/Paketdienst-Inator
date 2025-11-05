@@ -131,7 +131,7 @@ recoveryStep++;
 
 int l = SensorValue(LEFT_SENSOR);
 int r = SensorValue(RIGHT_SENSOR);
-int m = SensorValue(MIDDLE_SENSOR);
+int m = SensorValue(BARCODE_SENSOR);
 
 if (isLineVisible(l, r, m)) {
 lost = false;
@@ -147,8 +147,10 @@ task main() {
 // configure sensors
 SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
 SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
+SetSensorType(BARCODE_SENSOR, SENSOR_TYPE_LIGHT);
 SetSensorLight(LEFT_SENSOR, true);
 SetSensorLight(RIGHT_SENSOR, true);
+SetSensorLight(BARCODE_SENSOR, true);
 
 // initialize PID
 lastError = (SensorValue(LEFT_SENSOR) - SensorValue(RIGHT_SENSOR)) / ERROR_SCALE;
@@ -159,9 +161,9 @@ while(true) {
 // read sensors
 int leftRaw = SensorValue(LEFT_SENSOR);
 int rightRaw = SensorValue(RIGHT_SENSOR);
-int middleRaw = SensorValue(MIDDLE_SENSOR);
+int middleRaw = SensorValue(BARCODE_SENSOR);
 
-```
+
 // --- LOST DETECTION ---
 bool leftOn = (leftRaw < lineThreshold);
 bool rightOn = (rightRaw < lineThreshold);
@@ -213,7 +215,7 @@ lastError = error;
 updateBarcode(middleRaw);
 
 Wait(LOOP_MS);
-```
+
 
 }
 }
