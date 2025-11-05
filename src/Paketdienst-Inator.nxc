@@ -11,12 +11,12 @@
 #define POWER_RANGE 100        // motor power range 0..100
 
 // PID gains - start conservative and tune
-float kp = 1.2;
-float ki = 0.01;
-float kd = 0.04;
+float kp = 4.75;
+float ki = 0.00;
+float kd = 0.02;
 
 // derivative filter time constant (seconds)
-const float DERIV_TAU = 0.02;
+const float DERIV_TAU = 0.04;
 
 // runtime state
 float integral = 0.0;
@@ -24,9 +24,9 @@ float lastError = 0.0;
 float derivative = 0.0;
 
 // base forward power and timing
-int base_speed = 40;                 // 0..100
+int base_speed = 61;                 // 0..100
 const float update_time = 0.01;      // seconds
-const int LOOP_MS = (int)(update_time * 1000); // integer ms for Sleep()
+const int LOOP_MS = update_time * 1000; // integer ms for Sleep()
 const int INTEGRAL_LIMIT = 30;       // tune later (see notes)
 
 // helper: clamp integer
@@ -61,10 +61,13 @@ task main() {
   SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
   SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
 
+  SetSensorLight(LEFT_SENSOR, true);
+  SetSensorLight(RIGHT_SENSOR, true);
+
   // OPTIONAL: initial read to initialize lastError / derivative
   int l0 = SensorValue(LEFT_SENSOR);
   int r0 = SensorValue(RIGHT_SENSOR);
-  float initError = ((float)l0 - (float)r0) / ERROR_SCALE;
+  float initError = (l0 - r0) / ERROR_SCALE;
   lastError = initError;
   derivative = 0.0;
   integral = 0.0;
@@ -80,7 +83,7 @@ task main() {
     int rightRaw = SensorValue(RIGHT_SENSOR);
 
     // compute normalized error: positive => line more on left
-    float error = ((float)leftRaw - (float)rightRaw) / ERROR_SCALE;
+    float error = (leftRaw - rightRaw) / ERROR_SCALE;
 
     // integral update with clamp (anti-windup)
     integral += error * update_time;
@@ -98,8 +101,8 @@ task main() {
     float steering = kp * error + ki * integral + kd * derivative;
 
     // map steering to motor power
-    int leftPower  = (int)(base_speed + steering * POWER_RANGE);
-    int rightPower = (int)(base_speed - steering * POWER_RANGE);
+    int leftPower  = base_speed + steering * POWER_RANGE;
+    int rightPower = base_speed - steering * POWER_RANGE;
 
     // clamp motor outputs
     leftPower  = clampInt(leftPower, -POWER_RANGE, POWER_RANGE);
@@ -127,6 +130,7 @@ task main() {
 
     // store for next loop
     lastError = error;
-    Sleep(LOOP_MS);
+    Wait(LOOP_MS);
+    //Sleep(LOOP_MS);
   } // while
 } // task main
