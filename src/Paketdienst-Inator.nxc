@@ -1,132 +1,219 @@
-// PID line follower - NXC (corrected)
-// Sensors: S1 = left light, S2 = right light
-// Motors:  OUT_B = left, OUT_C = right
+// PID line follower with lost recovery and barcode reading - NXC
 #include "Peripheral.h"
 
-#define ERROR_SCALE 100.0      // divide raw error by this to normalize (~ -1..1)
-#define POWER_RANGE 100        // motor power range 0..100
+// --- CONFIGURATION ---
+#define ERROR_SCALE 100.0
+#define POWER_RANGE 100
+#define LOOP_MS 10
+#define LOST_COUNT_MAX 25
+#define BARCODE_BUFFER_SIZE 16
+#define BARCODE_GAP_MAX 20
+#define MAX_DELTA_PER_LOOP 8
+int lineThreshold = 45;
 
-// PID gains - start conservative and tune
+// --- PID GAINS ---
 float kp = 4.75;
 float ki = 0.00;
 float kd = 0.02;
-
-// derivative filter time constant (seconds)
 const float DERIV_TAU = 0.04;
 
-// runtime state
+// --- BASE SPEED ---
+int base_speed = 61;
+const float update_time = 0.01; // seconds
+const int INTEGRAL_LIMIT = 30;
+
+// --- GLOBAL PID STATE ---
 float integral = 0.0;
 float lastError = 0.0;
 float derivative = 0.0;
 
-// base forward power and timing
-int base_speed = 61;                 // 0..100
-const float update_time = 0.01;      // seconds
-const int LOOP_MS = update_time * 1000; // integer ms for Sleep()
-const int INTEGRAL_LIMIT = 30;       // tune later (see notes)
+// --- LOST DETECTION ---
+int lostCounter = 0;
+bool lost = false;
 
-// helper: clamp integer
+// --- BARCODE READING ---
+int barcodeBuffer[BARCODE_BUFFER_SIZE];
+int barcodeIndex = 0;
+int barcodeGapCounter = 0;
+int lastBarcodeBit = -1;
+bool barcodeReading = false;
+
+// --- RECOVERY STATE ---
+int recoveryStep = 0;
+int recoveryPower = 20;
+bool recoveryDirRight = true;
+
+// --- PREVIOUS POWER FOR SLEW ---
+int prevLeftApplied = 0;
+int prevRightApplied = 0;
+
+// --- HELPER FUNCTIONS ---
 int clampInt(int v, int lo, int hi) {
-  if (v < lo) return lo;
-  if (v > hi) return hi;
-  return v;
+if (v < lo) return lo;
+if (v > hi) return hi;
+return v;
 }
 
-// helper: apply signed power to motor (handles direction)
 void applyMotorPower(int motorPort, int signedPower) {
-  int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
-  if (p > 0) {
-    OnFwd(motorPort, p);
-  } else if (p < 0) {
-    OnRev(motorPort, -p);
-  } else {
-    Off(motorPort);
-  }
+int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
+if (p > 0) OnFwd(motorPort, p);
+else if (p < 0) OnRev(motorPort, -p);
+else Off(motorPort);
 }
 
-// OPTIONAL: very small slew rate limiter (prevents instant jumps)
 int limitDelta(int prev, int target, int maxDelta) {
-  int d = target - prev;
-  if (d > maxDelta) d = maxDelta;
-  if (d < -maxDelta) d = -maxDelta;
-  return prev + d;
+int d = target - prev;
+if (d > maxDelta) d = maxDelta;
+if (d < -maxDelta) d = -maxDelta;
+return prev + d;
 }
 
+bool isLineVisible(int left, int right, int middle) {
+return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
+}
+
+void updateBarcode(int middleRaw) {
+int barcodeBit = (middleRaw < lineThreshold) ? 0 : 1;
+if (lastBarcodeBit == -1) lastBarcodeBit = barcodeBit;
+
+if (barcodeBit != lastBarcodeBit) {
+barcodeGapCounter = 0;
+if (!barcodeReading) {
+barcodeReading = true;
+barcodeIndex = 0;
+}
+if (barcodeIndex < BARCODE_BUFFER_SIZE) barcodeBuffer[barcodeIndex++] = barcodeBit;
+lastBarcodeBit = barcodeBit;
+} else if (barcodeReading) {
+barcodeGapCounter++;
+if (barcodeGapCounter > BARCODE_GAP_MAX) {
+barcodeReading = false;
+TextOut(0, LCD_LINE4, "Barcode: ");
+for (int i = 0; i < barcodeIndex; i++) NumOut(60 + i * 4, LCD_LINE4, barcodeBuffer[i]);
+TextOut(0, LCD_LINE5, "Done     ");
+}
+}
+}
+
+void handleLostRecovery() {
+integral = 0.0;
+derivative = 0.0;
+
+switch (recoveryStep) {
+case 0: recoveryPower = 20; break;
+case 1: recoveryPower = 35; break;
+case 2: recoveryPower = 50; break;
+case 3:
+applyMotorPower(LEFT_MOTOR, 30);
+applyMotorPower(RIGHT_MOTOR, 30);
+Wait(200);
+recoveryStep++;
+return;
+case 4:
+applyMotorPower(LEFT_MOTOR, -30);
+applyMotorPower(RIGHT_MOTOR, -30);
+Wait(200);
+recoveryDirRight = !recoveryDirRight;
+recoveryStep = 0;
+return;
+}
+
+if (recoveryDirRight) {
+applyMotorPower(LEFT_MOTOR,  recoveryPower);
+applyMotorPower(RIGHT_MOTOR, -recoveryPower);
+} else {
+applyMotorPower(LEFT_MOTOR, -recoveryPower);
+applyMotorPower(RIGHT_MOTOR,  recoveryPower);
+}
+
+Wait(150);
+recoveryStep++;
+
+int l = SensorValue(LEFT_SENSOR);
+int r = SensorValue(RIGHT_SENSOR);
+int m = SensorValue(MIDDLE_SENSOR);
+
+if (isLineVisible(l, r, m)) {
+lost = false;
+lostCounter = 0;
+recoveryStep = 0;
+}
+}
+
+// =====================================================
+// MAIN TASK
+// =====================================================
 task main() {
-  // configure sensors as light sensors
-  SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
-  SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
+// configure sensors
+SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
+SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
+SetSensorLight(LEFT_SENSOR, true);
+SetSensorLight(RIGHT_SENSOR, true);
 
-  SetSensorLight(LEFT_SENSOR, true);
-  SetSensorLight(RIGHT_SENSOR, true);
+// initialize PID
+lastError = (SensorValue(LEFT_SENSOR) - SensorValue(RIGHT_SENSOR)) / ERROR_SCALE;
+derivative = 0.0;
+integral = 0.0;
 
-  // OPTIONAL: initial read to initialize lastError / derivative
-  int l0 = SensorValue(LEFT_SENSOR);
-  int r0 = SensorValue(RIGHT_SENSOR);
-  float initError = (l0 - r0) / ERROR_SCALE;
-  lastError = initError;
-  derivative = 0.0;
-  integral = 0.0;
+while(true) {
+// read sensors
+int leftRaw = SensorValue(LEFT_SENSOR);
+int rightRaw = SensorValue(RIGHT_SENSOR);
+int middleRaw = SensorValue(MIDDLE_SENSOR);
 
-  // previous applied power for slew limiting
-  int prevLeftApplied = 0;
-  int prevRightApplied = 0;
-  const int MAX_DELTA_PER_LOOP = 8; // tune
+```
+// --- LOST DETECTION ---
+bool leftOn = (leftRaw < lineThreshold);
+bool rightOn = (rightRaw < lineThreshold);
+bool middleOn = (middleRaw < lineThreshold);
 
-  while(true) {
-    // read sensors (0..100 typical)
-    int leftRaw  = SensorValue(LEFT_SENSOR);
-    int rightRaw = SensorValue(RIGHT_SENSOR);
+if (!leftOn && !rightOn && !middleOn) lostCounter++;
+else lostCounter = 0;
 
-    // compute normalized error: positive => line more on left
-    float error = (leftRaw - rightRaw) / ERROR_SCALE;
+lost = (lostCounter > LOST_COUNT_MAX);
 
-    // integral update with clamp (anti-windup)
-    integral += error * update_time;
-    if (integral > INTEGRAL_LIMIT) integral = INTEGRAL_LIMIT;
-    if (integral < -INTEGRAL_LIMIT) integral = -INTEGRAL_LIMIT;
+if (lost) {
+  handleLostRecovery();
+  continue;
+}
 
-    // raw derivative
-    float rawD = (error - lastError) / update_time;
+// --- PID CONTROL ---
+float error = (leftRaw - rightRaw) / ERROR_SCALE;
 
-    // derivative low-pass filter
-    float alpha = update_time / (DERIV_TAU + update_time);
-    derivative = derivative * (1.0 - alpha) + rawD * alpha;
+integral += error * update_time;
+if (integral > INTEGRAL_LIMIT) integral = INTEGRAL_LIMIT;
+if (integral < -INTEGRAL_LIMIT) integral = -INTEGRAL_LIMIT;
 
-    // PID steering (signed - usually small, ~ -1..1)
-    float steering = kp * error + ki * integral + kd * derivative;
+float rawD = (error - lastError) / update_time;
+float alpha = update_time / (DERIV_TAU + update_time);
+derivative = derivative * (1.0 - alpha) + rawD * alpha;
 
-    // map steering to motor power
-    int leftPower  = base_speed + steering * POWER_RANGE;
-    int rightPower = base_speed - steering * POWER_RANGE;
+float steering = kp * error + ki * integral + kd * derivative;
+int leftPower  = clampInt(base_speed + steering * POWER_RANGE, -POWER_RANGE, POWER_RANGE);
+int rightPower = clampInt(base_speed - steering * POWER_RANGE, -POWER_RANGE, POWER_RANGE);
 
-    // clamp motor outputs
-    leftPower  = clampInt(leftPower, -POWER_RANGE, POWER_RANGE);
-    rightPower = clampInt(rightPower, -POWER_RANGE, POWER_RANGE);
+// simple anti-windup
+float unsatLeft = base_speed + steering * POWER_RANGE;
+float unsatRight = base_speed - steering * POWER_RANGE;
+if ((unsatLeft != leftPower) || (unsatRight != rightPower)) integral -= error * update_time;
 
-    // anti-windup (simple): if we saturated, undo last integral step
-    // (compare unsaturated desired to saturated)
-    // unsat values:
-    float unsatLeft = base_speed + steering * POWER_RANGE;
-    float unsatRight = base_speed - steering * POWER_RANGE;
-    if ((unsatLeft != leftPower) || (unsatRight != rightPower)) {
-      // undo last integral addition
-      integral -= error * update_time;
-    }
+// --- SLEW LIMIT ---
+int appliedLeft = limitDelta(prevLeftApplied, leftPower, MAX_DELTA_PER_LOOP);
+int appliedRight = limitDelta(prevRightApplied, rightPower, MAX_DELTA_PER_LOOP);
+prevLeftApplied = appliedLeft;
+prevRightApplied = appliedRight;
 
-    // optionally limit rate of change (slew)
-    int appliedLeft = limitDelta(prevLeftApplied, leftPower, MAX_DELTA_PER_LOOP);
-    int appliedRight = limitDelta(prevRightApplied, rightPower, MAX_DELTA_PER_LOOP);
-    prevLeftApplied = appliedLeft;
-    prevRightApplied = appliedRight;
+// --- APPLY POWER ---
+applyMotorPower(LEFT_MOTOR, appliedLeft);
+applyMotorPower(RIGHT_MOTOR, appliedRight);
 
-    // apply to motors (handles forward/reverse)
-    applyMotorPower(LEFT_MOTOR, appliedLeft);
-    applyMotorPower(RIGHT_MOTOR, appliedRight);
+lastError = error;
 
-    // store for next loop
-    lastError = error;
-    Wait(LOOP_MS);
-    //Sleep(LOOP_MS);
-  } // while
-} // task main
+// --- BARCODE READING ---
+updateBarcode(middleRaw);
+
+Wait(LOOP_MS);
+```
+
+}
+}
