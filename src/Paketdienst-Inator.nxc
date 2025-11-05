@@ -1,11 +1,7 @@
 // PID line follower - NXC (corrected)
 // Sensors: S1 = left light, S2 = right light
 // Motors:  OUT_B = left, OUT_C = right
-
-#define LEFT_SENSOR  S1
-#define RIGHT_SENSOR S2
-#define LEFT_MOTOR   OUT_B
-#define RIGHT_MOTOR  OUT_C
+#include "Peripheral.h"
 
 #define ERROR_SCALE 100.0      // divide raw error by this to normalize (~ -1..1)
 #define POWER_RANGE 100        // motor power range 0..100
