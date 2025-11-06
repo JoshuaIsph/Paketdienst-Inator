@@ -12,6 +12,7 @@
 // =====================================================
 task main() {
 
+
   hardwareControl_init();
 
   int leftRaw = SensorValue(LEFT_SENSOR);

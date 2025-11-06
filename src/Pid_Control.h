@@ -1,3 +1,4 @@
+
 #ifndef _PID_CONTROL_H_
 #define _PID_CONTROL_H_
 
@@ -53,6 +54,14 @@ int pid_getRightPower() {
 }
 
 
+
+int limitDelta(int prev, int target, int maxDelta) {
+    int d = target - prev;
+    if (d > maxDelta) d = maxDelta;
+    if (d < -maxDelta) d = -maxDelta;
+    return prev + d;
+}
+
 void pid_update(int leftRaw, int rightRaw) {
 
     float error = (leftRaw - rightRaw) / ERROR_SCALE;
@@ -73,7 +82,9 @@ void pid_update(int leftRaw, int rightRaw) {
     // simple anti-windup
     float unsatLeft = base_speed + steering * POWER_RANGE;
     float unsatRight = base_speed - steering * POWER_RANGE;
-    if ((unsatLeft != leftPower) || (unsatRight != rightPower)) integral -= error * update_time;
+    if ((unsatLeft != leftPower) || (unsatRight != rightPower)) {
+      integral -= error * update_time;
+    }
 
     // --- SLEW LIMIT ---
     int appliedLeft = limitDelta(prevLeftApplied, leftPower, MAX_DELTA_PER_LOOP);
@@ -86,6 +97,5 @@ void pid_update(int leftRaw, int rightRaw) {
 
     lastError = error;
 }
-
 
 #endif

@@ -21,13 +21,6 @@ int recoveryPower = 20;
 bool recoveryDirRight = true;
 
 
-int limitDelta(int prev, int target, int maxDelta) {
-    int d = target - prev;
-    if (d > maxDelta) d = maxDelta;
-    if (d < -maxDelta) d = -maxDelta;
-    return prev + d;
-}
-
 bool isLineVisible(int left, int right, int middle) {
     return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
 }
