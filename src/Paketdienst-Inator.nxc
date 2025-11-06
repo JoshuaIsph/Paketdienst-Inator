@@ -1,221 +1,58 @@
 // PID line follower with lost recovery and barcode reading - NXC
 #include "Peripheral.h"
+#include "Pid_Control.h"
+#include "Barcode_Scanner.h"
+#include "HardwareControl.h"
+#include "LostRecovery.h"
 
-// --- CONFIGURATION ---
-#define ERROR_SCALE 100.0
-#define POWER_RANGE 100
-#define LOOP_MS 10
-#define LOST_COUNT_MAX 25
-#define BARCODE_BUFFER_SIZE 16
-#define BARCODE_GAP_MAX 20
-#define MAX_DELTA_PER_LOOP 8
-int lineThreshold = 45;
 
-// --- PID GAINS ---
-float kp = 4.75;
-float ki = 0.00;
-float kd = 0.02;
-const float DERIV_TAU = 0.04;
-
-// --- BASE SPEED ---
-int base_speed = 61;
-const float update_time = 0.01; // seconds
-const int INTEGRAL_LIMIT = 30;
-
-// --- GLOBAL PID STATE ---
-float integral = 0.0;
-float lastError = 0.0;
-float derivative = 0.0;
-
-// --- LOST DETECTION ---
-int lostCounter = 0;
-bool lost = false;
-
-// --- BARCODE READING ---
-int barcodeBuffer[BARCODE_BUFFER_SIZE];
-int barcodeIndex = 0;
-int barcodeGapCounter = 0;
-int lastBarcodeBit = -1;
-bool barcodeReading = false;
-
-// --- RECOVERY STATE ---
-int recoveryStep = 0;
-int recoveryPower = 20;
-bool recoveryDirRight = true;
-
-// --- PREVIOUS POWER FOR SLEW ---
-int prevLeftApplied = 0;
-int prevRightApplied = 0;
-
-// --- HELPER FUNCTIONS ---
-int clampInt(int v, int lo, int hi) {
-if (v < lo) return lo;
-if (v > hi) return hi;
-return v;
-}
-
-void applyMotorPower(int motorPort, int signedPower) {
-int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
-if (p > 0) OnFwd(motorPort, p);
-else if (p < 0) OnRev(motorPort, -p);
-else Off(motorPort);
-}
-
-int limitDelta(int prev, int target, int maxDelta) {
-int d = target - prev;
-if (d > maxDelta) d = maxDelta;
-if (d < -maxDelta) d = -maxDelta;
-return prev + d;
-}
-
-bool isLineVisible(int left, int right, int middle) {
-return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
-}
-
-void updateBarcode(int middleRaw) {
-int barcodeBit = (middleRaw < lineThreshold) ? 0 : 1;
-if (lastBarcodeBit == -1) lastBarcodeBit = barcodeBit;
-
-if (barcodeBit != lastBarcodeBit) {
-barcodeGapCounter = 0;
-if (!barcodeReading) {
-barcodeReading = true;
-barcodeIndex = 0;
-}
-if (barcodeIndex < BARCODE_BUFFER_SIZE) barcodeBuffer[barcodeIndex++] = barcodeBit;
-lastBarcodeBit = barcodeBit;
-} else if (barcodeReading) {
-barcodeGapCounter++;
-if (barcodeGapCounter > BARCODE_GAP_MAX) {
-barcodeReading = false;
-TextOut(0, LCD_LINE4, "Barcode: ");
-for (int i = 0; i < barcodeIndex; i++) NumOut(60 + i * 4, LCD_LINE4, barcodeBuffer[i]);
-TextOut(0, LCD_LINE5, "Done     ");
-}
-}
-}
-
-void handleLostRecovery() {
-integral = 0.0;
-derivative = 0.0;
-
-switch (recoveryStep) {
-case 0: recoveryPower = 20; break;
-case 1: recoveryPower = 35; break;
-case 2: recoveryPower = 50; break;
-case 3:
-applyMotorPower(LEFT_MOTOR, 30);
-applyMotorPower(RIGHT_MOTOR, 30);
-Wait(200);
-recoveryStep++;
-return;
-case 4:
-applyMotorPower(LEFT_MOTOR, -30);
-applyMotorPower(RIGHT_MOTOR, -30);
-Wait(200);
-recoveryDirRight = !recoveryDirRight;
-recoveryStep = 0;
-return;
-}
-
-if (recoveryDirRight) {
-applyMotorPower(LEFT_MOTOR,  recoveryPower);
-applyMotorPower(RIGHT_MOTOR, -recoveryPower);
-} else {
-applyMotorPower(LEFT_MOTOR, -recoveryPower);
-applyMotorPower(RIGHT_MOTOR,  recoveryPower);
-}
-
-Wait(150);
-recoveryStep++;
-
-int l = SensorValue(LEFT_SENSOR);
-int r = SensorValue(RIGHT_SENSOR);
-int m = SensorValue(BARCODE_SENSOR);
-
-if (isLineVisible(l, r, m)) {
-lost = false;
-lostCounter = 0;
-recoveryStep = 0;
-}
-}
 
 // =====================================================
 // MAIN TASK
 // =====================================================
 task main() {
-// configure sensors
-SetSensorType(LEFT_SENSOR, SENSOR_TYPE_LIGHT);
-SetSensorType(RIGHT_SENSOR, SENSOR_TYPE_LIGHT);
-SetSensorType(BARCODE_SENSOR, SENSOR_TYPE_LIGHT);
-SetSensorLight(LEFT_SENSOR, true);
-SetSensorLight(RIGHT_SENSOR, true);
-SetSensorLight(BARCODE_SENSOR, true);
 
-// initialize PID
-lastError = (SensorValue(LEFT_SENSOR) - SensorValue(RIGHT_SENSOR)) / ERROR_SCALE;
-derivative = 0.0;
-integral = 0.0;
+  hardwareControl_init();
 
-while(true) {
-// read sensors
-int leftRaw = SensorValue(LEFT_SENSOR);
-int rightRaw = SensorValue(RIGHT_SENSOR);
-int middleRaw = SensorValue(BARCODE_SENSOR);
+  int leftRaw = SensorValue(LEFT_SENSOR);
+  int rightRaw = SensorValue(RIGHT_SENSOR);
+  int middleRaw = SensorValue(BARCODE_SENSOR);
+
+  pid_init(leftRaw, rightRaw);
+
+  
+  while(true) {
+    // read sensors
+    leftRaw = SensorValue(LEFT_SENSOR);
+    rightRaw = SensorValue(RIGHT_SENSOR);
+    middleRaw = SensorValue(BARCODE_SENSOR);
 
 
-// --- LOST DETECTION ---
-bool leftOn = (leftRaw < lineThreshold);
-bool rightOn = (rightRaw < lineThreshold);
-bool middleOn = (middleRaw < lineThreshold);
+    bool isLost = lostRecovery_isLost(leftRaw, rightRaw, middleRaw);
+    if(isLost) {
+      lostRecovery_handleLostRecovery();
+      continue;
+    }
 
-if (!leftOn && !rightOn && !middleOn) lostCounter++;
-else lostCounter = 0;
+    // --- PID CONTROL ---
+    pid_update(leftRaw, rightRaw);
 
-lost = (lostCounter > LOST_COUNT_MAX);
-
-if (lost) {
-  handleLostRecovery();
-  continue;
-}
-
-// --- PID CONTROL ---
-float error = (leftRaw - rightRaw) / ERROR_SCALE;
-
-integral += error * update_time;
-if (integral > INTEGRAL_LIMIT) integral = INTEGRAL_LIMIT;
-if (integral < -INTEGRAL_LIMIT) integral = -INTEGRAL_LIMIT;
-
-float rawD = (error - lastError) / update_time;
-float alpha = update_time / (DERIV_TAU + update_time);
-derivative = derivative * (1.0 - alpha) + rawD * alpha;
-
-float steering = kp * error + ki * integral + kd * derivative;
-int leftPower  = clampInt(base_speed + steering * POWER_RANGE, -POWER_RANGE, POWER_RANGE);
-int rightPower = clampInt(base_speed - steering * POWER_RANGE, -POWER_RANGE, POWER_RANGE);
-
-// simple anti-windup
-float unsatLeft = base_speed + steering * POWER_RANGE;
-float unsatRight = base_speed - steering * POWER_RANGE;
-if ((unsatLeft != leftPower) || (unsatRight != rightPower)) integral -= error * update_time;
-
-// --- SLEW LIMIT ---
-int appliedLeft = limitDelta(prevLeftApplied, leftPower, MAX_DELTA_PER_LOOP);
-int appliedRight = limitDelta(prevRightApplied, rightPower, MAX_DELTA_PER_LOOP);
-prevLeftApplied = appliedLeft;
-prevRightApplied = appliedRight;
-
-// --- APPLY POWER ---
-applyMotorPower(LEFT_MOTOR, appliedLeft);
-applyMotorPower(RIGHT_MOTOR, appliedRight);
-
-lastError = error;
-
-// --- BARCODE READING ---
-updateBarcode(middleRaw);
-
-Wait(LOOP_MS);
+    int appliedLeft = pid_getLeftPower();
+    int appliedRight = pid_getRightPower();
 
 
-}
+
+    // --- APPLY POWER ---
+    applyMotorPower(LEFT_MOTOR, appliedLeft);
+    applyMotorPower(RIGHT_MOTOR, appliedRight);
+
+
+    // --- BARCODE READING ---
+    barcode_update(middleRaw);
+
+
+    // --- Loop End ---
+    Wait(LOOP_MS);
+
+  }
 }
