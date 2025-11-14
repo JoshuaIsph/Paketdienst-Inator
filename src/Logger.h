@@ -1,4 +1,7 @@
 
+#ifndef _LOGGER_H_
+#define _LOGGER_H_
+
 
 #define LETTER_WIDTH 5
 #define LETTER_HEIGHT 8
@@ -126,3 +129,5 @@ void log_waitForUserInput() {
 #undef ALARM_FREQ_3
 #undef ALARM_TONE_DURATION
 */
+
+#endif
