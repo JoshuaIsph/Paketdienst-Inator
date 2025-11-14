@@ -1,4 +1,5 @@
 // PID line follower with lost recovery and barcode reading - NXC
+#include "Logger.h"
 #include "Peripheral.h"
 #include "Pid_Control.h"
 #include "Barcode_Scanner.h"
@@ -12,7 +13,7 @@
 // =====================================================
 task main() {
 
-
+  log_init(); // SHOULD BE FIRST TO INITIALIZE!
   hardwareControl_init();
 
   int leftRaw = SensorValue(LEFT_SENSOR);
