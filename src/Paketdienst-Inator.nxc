@@ -29,8 +29,8 @@ task main() {
     middleRaw = SensorValue(BARCODE_SENSOR);
 
 
-    bool isLost = lostRecovery_isLost(leftRaw, rightRaw, middleRaw);
-    if(isLost) {
+    
+    if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
       lostRecovery_handleLostRecovery();
       continue;
     }

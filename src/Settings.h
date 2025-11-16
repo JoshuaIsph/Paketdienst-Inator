@@ -5,7 +5,7 @@
 #define POWER_RANGE 100
 #define LOOP_MS 10
 const float update_time = 0.01; // seconds
-const int lineThreshold = 45;
+
 
 
 
