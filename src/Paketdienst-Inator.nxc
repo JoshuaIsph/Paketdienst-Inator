@@ -31,7 +31,7 @@ task main() {
 
     
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
-      lostRecovery_handleLostRecovery();
+      lostRecovery_handleRecovery();
       continue;
     }
 

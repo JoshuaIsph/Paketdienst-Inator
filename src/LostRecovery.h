@@ -13,10 +13,10 @@
 const int FORWARD_POWER = 30; // TODO adjust forward Power
 const int BACKWARD_POWER = -30;// TODO adjust backward Power
 const int spinPower = 30;       // TODO adjust spin Power
-const int lineThreshold = 50;
+const int lineThreshold = 50;   // TODO adjust line detection threshold
 
 // Spin duration for small/medium/large turns
-const int SPIN_TIMES[3] = {100, 150, 250};
+const int SPIN_TIMES[3] = {100, 150, 250}; // TODO adjust spin durations
 
 // --- LOST DETECTION ---
 int lostCounter = 0;
