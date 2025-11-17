@@ -10,10 +10,10 @@
 #define FORWARD_BACKWARD_WAIT_MS 200
 #define MAX_RECOVERY_MULTIPLIER 5 // Maximum multiplier for forward/backward
 
-const int FORWARD_POWER = 30; // TODO adjust forward Power
-const int BACKWARD_POWER = -30;// TODO adjust backward Power
-const int spinPower = 30;       // TODO adjust spin Power
-const int lineThreshold = 50;   // TODO adjust line detection threshold
+const int FORWARD_POWER = 50; // TODO adjust forward Power
+const int BACKWARD_POWER = -50;// TODO adjust backward Power
+const int spinPower = 50;       // TODO adjust spin Power
+const int lineThreshold = 30;   // TODO adjust line detection threshold
 
 // Spin duration for small/medium/large turns
 const int SPIN_TIMES[3] = {100, 150, 250}; // TODO adjust spin durations
