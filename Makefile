@@ -1,3 +1,11 @@
+
+TARGET = src/Paketdienst-Inator.nxc
+INCLUDE_PATH = src
+OUTPUT = Paketdienst-Inator
+OPTIMIZATION_LEVEL = 5 # Level 1 - 2   |   With newest compiler: 1 - 5
+
+
+# ----- Path for OS -----
 ifneq ($(OS),Windows_NT)
 	UNAME_S = $(shell uname -s)
 
@@ -12,13 +20,7 @@ endif
 
 HOME_DIR = $(or $(HOME), $(USERPROFILE))
 
-TARGET = src/Paketdienst-Inator.nxc
-INCLUDE_PATH = src
-OUTPUT = Paketdienst-Inator
-OPTIMIZATION_LEVEL = 5 # Level 1 - 2   |   With newest compiler: 1 - 5
 
-
-# ----- Path for OS -----
 ifeq ($(OS),Windows_NT)
 	NBC = $(HOME_DIR)\.vscode\extensions\undefined_publisher.nxt-compiler-0.0.1\files\Windows\nbc.exe
 else
@@ -36,7 +38,7 @@ all: compile clean
 
 
 compile:
-	$(NBC) $(TARGET) -I=$(INCLUDE_PATH) -O=$(OUTPUT) -d  -Z$(OPTIMIZATION_LEVEL)
+	$(NBC) $(TARGET) -I=$(INCLUDE_PATH) -O=$(OUTPUT) -Z$(OPTIMIZATION_LEVEL)
 	@echo Compilation successful
 
 
