@@ -46,5 +46,7 @@ void barcode_update(int middleRaw) {
     }
 }
 
+#undef lineThreshold // Because same name as in LostRecovery.h
+
 
 #endif

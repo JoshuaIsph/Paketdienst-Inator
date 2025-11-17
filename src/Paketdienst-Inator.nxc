@@ -27,7 +27,7 @@ task main() {
     // read sensors
     leftRaw = SensorValue(LEFT_SENSOR);
     rightRaw = SensorValue(RIGHT_SENSOR);
-    middleRaw = SensorValue(BARCODE_SENSOR);
+    middleRaw = SensorValue(MIDDLE_SENSOR);
 
 
     
