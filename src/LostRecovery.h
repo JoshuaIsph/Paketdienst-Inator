@@ -6,14 +6,14 @@
 #include "Pid_Control.h"
 
 // --- CONFIGURATION ---
-#define LOST_COUNT_MAX 25 
+#define LOST_COUNT_MAX 5 
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20 
 
 const int FORWARD_POWER = 50; 
 const int BACKWARD_POWER = -50;
 const int spinPower = 50;       
-const int lineThreshold = 30;   
+const int lineThreshold = 27;   
 const int SPIN_TIMES[3] = {200, 300, 400}; // Small, Medium, Large spins
 
 // --- VARIABLES ---
@@ -22,6 +22,7 @@ bool lost = false;
 int recoveryMultiplier = 1; 
 
 // --- DECLARATIONS ---
+/*
 bool lostRecovery_isLost(int l, int r, int m);
 bool lostRecovery_isLineVisible(int l, int r, int m);
 void lostRecovery_reset();
@@ -29,6 +30,7 @@ bool checkLineOrWait(int duration);
 bool attemptMove(int leftPwr, int rightPwr, int duration);
 bool performWiggleRoutine(int duration);
 void lostRecovery_handleRecovery();
+*/
 
 // =========================================================
 // 1. SENSOR & STATE HELPERS

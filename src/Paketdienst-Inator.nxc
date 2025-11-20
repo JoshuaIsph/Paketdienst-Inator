@@ -2,7 +2,6 @@
 #include "Logger.h"
 #include "Peripheral.h"
 #include "Pid_Control.h"
-#include "Barcode_Scanner.h"
 #include "HardwareControl.h"
 #include "LostRecovery.h"
 
@@ -32,6 +31,7 @@ task main() {
 
     
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
+        log_playAlarm();
       lostRecovery_handleRecovery();
       continue;
     }
@@ -50,7 +50,7 @@ task main() {
 
 
     // --- BARCODE READING ---
-    barcode_update(middleRaw);
+    //barcode_update(middleRaw);
 
 
     // --- Loop End ---
