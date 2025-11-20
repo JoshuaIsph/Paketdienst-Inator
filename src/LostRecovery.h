@@ -12,9 +12,9 @@
 
 const int FORWARD_POWER = 50; 
 const int BACKWARD_POWER = -50;
-const int spinPower = 50;       
+const int spinPower = 100;       
 const int lineThreshold = 27;   
-const int SPIN_TIMES[3] = {200, 300, 400}; // Small, Medium, Large spins
+const int SPIN_TIMES[] = {200, 300, 400}; // Small, Medium, Large spins
 
 // --- VARIABLES ---
 int lostCounter = 0;
@@ -85,18 +85,24 @@ bool checkLineOrWait(int duration) {
 
 // Wrapper to set motors and call the smart wait
 bool attemptMove(int leftPwr, int rightPwr, int duration) {
+    
     applyMotorPower(LEFT_MOTOR, leftPwr);
     applyMotorPower(RIGHT_MOTOR, rightPwr);
+    //Wait(1000);
     if (lostRecovery_isLineVisible(SensorValue(LEFT_SENSOR), SensorValue(RIGHT_SENSOR), SensorValue(BARCODE_SENSOR))) {
             lostRecovery_reset(); // Reset everything
             return true;          // Signal SUCCESS
         }
-    return checkLineOrWait(duration);
+        
+    return checkLineOrWait(duration*5);
 }
 
 // Performs: Right -> Center -> Left -> Center
 bool performWiggleRoutine(int duration) {
     // 1. Look Right
+
+    log_println(StrCat("Wiggle: ", NumToStr(duration)));
+
     if (attemptMove(spinPower, -spinPower, duration)) return true;
     
     // 2. Return Center (Left)
@@ -144,6 +150,9 @@ void lostRecovery_handleRecovery() {
         
         int spinTime = SPIN_TIMES[timeIndex];
         int moveTime = FORWARD_BACKWARD_WAIT_MS * recoveryMultiplier;
+
+        log_println(StrCat("TIndex: ", NumToStr(timeIndex)));
+        log_println(StrCat("STime: ", NumToStr(spinTime)));
 
         // --- SEQUENCE STEP 1: WIGGLE (At Current Spot) ---
         if (performWiggleRoutine(spinTime)) return; // Return if found
