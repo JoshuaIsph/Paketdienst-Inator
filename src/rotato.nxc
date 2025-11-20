@@ -1,0 +1,14 @@
+#include "Wenden_C1.h"
+#include "HardwareControl.h"
+#include "Logger.h"
+
+task main() {
+    log_init();
+    hardwareControl_init();
+    bool challenge1 = true; 
+    applyMotorPower(LEFT_MOTOR, BASE_SPEED);
+    applyMotorPower(RIGHT_MOTOR, BASE_SPEED);
+    while (!challenge1) {
+        challenge1 = wenden();
+    }
+}
