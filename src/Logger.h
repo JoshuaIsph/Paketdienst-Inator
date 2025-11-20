@@ -3,6 +3,8 @@
 #define _LOGGER_H_
 
 
+#include "SerialMonitor.h"
+
 #define LETTER_WIDTH 5
 #define LETTER_HEIGHT 8
 #define COLUMN_COUNT DISPLAY_HEIGHT/LETTER_HEIGHT
@@ -32,6 +34,8 @@ StringContainer printBuffer[LINE_COUNT];
 
 void log_init() {
 
+    serial_setChannel(0);
+
     for(unsigned int i = 0; i < LINE_COUNT; i++) {
         StringContainer line;
         line.text = "";
@@ -39,6 +43,13 @@ void log_init() {
     }
 
 }
+
+
+void log_printSerial(const string& data) {
+
+    serial_println(data);
+}
+
 
 // Internal function to shift line buffer
 void log_intern_shiftBuffer() {
@@ -52,6 +63,8 @@ void log_intern_shiftBuffer() {
 
 // Wrapper function to print on screen
 void log_println(string msg) {
+
+    serial_println(msg);
 
     log_intern_shiftBuffer();
 
