@@ -87,7 +87,13 @@ bool checkLineOrWait(int duration) {
 bool attemptMove(int leftPwr, int rightPwr, int duration) {
     applyMotorPower(LEFT_MOTOR, leftPwr);
     applyMotorPower(RIGHT_MOTOR, rightPwr);
-    return checkLineOrWait(duration);
+    Wait(duration);
+    if (lostRecovery_isLineVisible(SensorValue(LEFT_SENSOR), SensorValue(RIGHT_SENSOR), SensorValue(BARCODE_SENSOR))) {
+            lostRecovery_reset(); // Reset everything
+            return true;          // Signal SUCCESS
+        }
+    
+    return false;
 }
 
 // Performs: Right -> Center -> Left -> Center
@@ -125,7 +131,7 @@ void lostRecovery_handleRecovery() {
     while (true) {
         
         // Beep to indicate active recovery
-        PlayTone(1000, 50);
+        
 
         // Display Info
         ClearScreen();
