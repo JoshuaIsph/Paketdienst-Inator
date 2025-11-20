@@ -87,19 +87,18 @@ bool checkLineOrWait(int duration) {
 bool attemptMove(int leftPwr, int rightPwr, int duration) {
     applyMotorPower(LEFT_MOTOR, leftPwr);
     applyMotorPower(RIGHT_MOTOR, rightPwr);
-    Wait(duration);
     if (lostRecovery_isLineVisible(SensorValue(LEFT_SENSOR), SensorValue(RIGHT_SENSOR), SensorValue(BARCODE_SENSOR))) {
             lostRecovery_reset(); // Reset everything
             return true;          // Signal SUCCESS
         }
-    
-    return false;
+    return checkLineOrWait(duration);
 }
 
 // Performs: Right -> Center -> Left -> Center
 bool performWiggleRoutine(int duration) {
     // 1. Look Right
     if (attemptMove(spinPower, -spinPower, duration)) return true;
+    
     // 2. Return Center (Left)
     if (attemptMove(-spinPower, spinPower, duration)) return true;
     // 3. Look Left
