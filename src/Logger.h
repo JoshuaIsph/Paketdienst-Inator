@@ -33,13 +33,14 @@ struct StringContainer {
 };
 
 StringContainer printBuffer[LINE_COUNT];
-int printBufferStart = 0;
+int printBufferStart = LINE_COUNT - 1;
 
 
 void log_init() {
 
     #if SERIAL_MONITOR
     serial_setChannel(0);
+    serial_println("Robot BT COM");
     #endif
 
     for(unsigned int i = 0; i < LINE_COUNT; i++) {
@@ -63,22 +64,16 @@ void log_printSerial(const string& data) {
 // Internal function to shift line buffer
 void log_intern_shiftBuffer() {
 
-    printBufferStart++;
-    if(printBufferStart >= LINE_COUNT) {
-        printBufferStart = 0;
+    if(printBufferStart <= 0) {
+        printBufferStart = LINE_COUNT - 1;
+    } else {
+        printBufferStart--;
     }
 }
 
 
 int log_intern_getCurrentLineIndex() {
-
-    int current = printBufferStart + 1;
-
-    if(current >= LINE_COUNT) {
-        current = 0;
-    }
-
-    return current;
+   return printBufferStart;
 }
 
 void log_intern_printBuffer() {
@@ -103,11 +98,10 @@ void log_println(const string& msg) {
 
     serial_println(msg);
 
-    log_intern_shiftBuffer();
-
     StringContainer newLine;
     newLine.text = msg;
 
+    log_intern_shiftBuffer();
     int currentIndex = log_intern_getCurrentLineIndex();
     printBuffer[currentIndex] = newLine;
 

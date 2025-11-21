@@ -15,16 +15,7 @@ task main() {
 
   log_init(); // SHOULD BE FIRST TO INITIALIZE!
 
-  log_printSerial("Robot BT COM\n");
-  log_printSerial("Start Paketdienst-Inator\n");
-
-/*
-  for(unsigned int i = 0; i < 10; i++) {
-    log_printSerial(StrCat("Line: ", NumToStr(i), "\n"));
-  }
-
-  while(true);
-*/
+  
   hardwareControl_init();
 
   int leftRaw = SensorValue(LEFT_SENSOR);

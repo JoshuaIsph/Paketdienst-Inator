@@ -13,17 +13,17 @@ void serial_setChannel(byte channel) {
 
 void serial_println(const string& data) {
 
-    //string line = StrCat(data, "\n");
+    string line = StrCat(data, "\n");
 
-    const int length = StrLen(data);
+    const int length = StrLen(line);
 
     byte buffer[];
 
     ArrayInit(buffer, 0, length);
 
-    StrToByteArray(data, buffer);
+    StrToByteArray(line, buffer);
 
-    while(BluetoothStatus(bluetoothChannel) & BT_BRICK_PORT_OPEN);
+    //while(BluetoothStatus(bluetoothChannel) & BT_BRICK_PORT_OPEN);
 
     int status = BluetoothWrite(bluetoothChannel, buffer);
     Wait(3);
