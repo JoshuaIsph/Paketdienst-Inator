@@ -2,8 +2,11 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
+#define SERIAL_MONITOR 1
 
+#if SERIAL_MONITOR
 #include "SerialMonitor.h"
+#endif
 
 #define LETTER_WIDTH 5
 #define LETTER_HEIGHT 8
@@ -30,11 +33,14 @@ struct StringContainer {
 };
 
 StringContainer printBuffer[LINE_COUNT];
+int printBufferStart = 0;
 
 
 void log_init() {
 
+    #if SERIAL_MONITOR
     serial_setChannel(0);
+    #endif
 
     for(unsigned int i = 0; i < LINE_COUNT; i++) {
         StringContainer line;
@@ -45,23 +51,54 @@ void log_init() {
 }
 
 
+// Print to serial monitor
 void log_printSerial(const string& data) {
 
+    #if SERIAL_MONITOR
     serial_println(data);
+    #endif
 }
 
 
 // Internal function to shift line buffer
 void log_intern_shiftBuffer() {
 
-    for(unsigned int i = LINE_COUNT - 1; i > 0; i--) {
-        printBuffer[i] = printBuffer[i - 1];
+    printBufferStart++;
+    if(printBufferStart >= LINE_COUNT) {
+        printBufferStart = 0;
+    }
+}
+
+
+int log_intern_getCurrentLineIndex() {
+
+    int current = printBufferStart + 1;
+
+    if(current >= LINE_COUNT) {
+        current = 0;
+    }
+
+    return current;
+}
+
+void log_intern_printBuffer() {
+
+    int index = printBufferStart;
+
+    for(unsigned int i = 0; i < LINE_COUNT; i++) {
+
+        TextOut(0, LETTER_HEIGHT * i, printBuffer[index].text);
+        index++;
+        if(index >= LINE_COUNT) {
+            index = 0;
+        }
+
     }
 
 }
 
 
-// Wrapper function to print on screen
+// Wrapper function to print on screen and serial monitor
 void log_println(string msg) {
 
     serial_println(msg);
@@ -71,12 +108,11 @@ void log_println(string msg) {
     StringContainer newLine;
     newLine.text = msg;
 
-    printBuffer[0] = newLine;
+    int currentIndex = log_intern_getCurrentLineIndex();
+    printBuffer[currentIndex] = newLine;
 
     ClearScreen();
-    for(unsigned int i = 0; i < LINE_COUNT; i++) {
-        TextOut(0, LETTER_HEIGHT * i, printBuffer[i].text);
-    }
+    log_intern_printBuffer();
 }
 
 
@@ -122,25 +158,5 @@ void log_waitForUserInput() {
     while(!ButtonPressed(BTNCENTER, false));
 }
 
-
-/*
-#undef LETTER_WIDTH
-#undef LETTER_HEIGHT
-#undef LINE_COUNT
-#undef COLUMN_COUNT
-
-#undef STATUS_TONE_FREQ
-#undef STATUS_TONE_DURATION
-
-#undef NOTIFY_TONE_FREQ_1
-#undef NOTIFY_TONE_FREQ_2
-#undef NOTIFY_TONE_DURATION
-
-#undef ALARM_BASE_FREQ
-#undef ALARM_FREQ_1
-#undef ALARM_FREQ_2
-#undef ALARM_FREQ_3
-#undef ALARM_TONE_DURATION
-*/
 
 #endif
