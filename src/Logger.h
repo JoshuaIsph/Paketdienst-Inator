@@ -27,7 +27,7 @@
 #define ALARM_TONE_DURATION 2
 
 
-// Only because of nxt compiler limitations...
+// Only because of nxc compiler limitations...
 struct StringContainer {
     string text;
 };
@@ -99,7 +99,7 @@ void log_intern_printBuffer() {
 
 
 // Wrapper function to print on screen and serial monitor
-void log_println(string msg) {
+void log_println(const string& msg) {
 
     serial_println(msg);
 
