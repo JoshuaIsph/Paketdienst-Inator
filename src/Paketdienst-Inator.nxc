@@ -5,6 +5,7 @@
 #include "Barcode_Scanner.h"
 #include "HardwareControl.h"
 #include "LostRecovery.h"
+#include "Basket.h"
 
 
 
@@ -17,6 +18,7 @@ task main() {
 
   
   hardwareControl_init();
+
 
   int leftRaw = SensorValue(LEFT_SENSOR);
   int rightRaw = SensorValue(RIGHT_SENSOR);
@@ -59,4 +61,9 @@ task main() {
     Wait(LOOP_MS);
 
   }
+
+  
+    Wait(200);
+
+    PlayTone(500, 1000);
 }
