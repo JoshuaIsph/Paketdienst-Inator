@@ -3,6 +3,7 @@
 #define _LOGGER_H_
 
 #define SERIAL_MONITOR 1
+#define ENABLE_SOUND 1
 
 #if SERIAL_MONITOR
 #include "SerialMonitor.h"
@@ -113,24 +114,26 @@ void log_println(const string& msg) {
 
 // Play sound for state change of state machine
 void log_playStatusSound() {
+    #if ENABLE_SOUND
     PlayTone(STATUS_TONE_FREQ, STATUS_TONE_DURATION); Wait(STATUS_TONE_DURATION);
+    #endif
 }
 
 // Play notify sound for important debug message on screen
 void log_playNotifySound() {
-
+    #if ENABLE_SOUND
     PlayTone(NOTIFY_TONE_FREQ_1, NOTIFY_TONE_DURATION * 2); Wait(NOTIFY_TONE_DURATION);
     PlayTone(NOTIFY_TONE_FREQ_2, NOTIFY_TONE_DURATION); Wait(NOTIFY_TONE_DURATION);
-
+    #endif
 }
 
 // Internal function
 void log_internal_alarmTone() {
-
+    #if ENABLE_SOUND
     PlayTone(ALARM_FREQ_1, ALARM_TONE_DURATION * 3); Wait(ALARM_TONE_DURATION);
     PlayTone(ALARM_FREQ_2, ALARM_TONE_DURATION * 3); Wait(ALARM_TONE_DURATION);
     PlayTone(ALARM_FREQ_3, ALARM_TONE_DURATION * 3); Wait(ALARM_TONE_DURATION);
-
+    #endif
 }
 
 // Play sound for any runtime error
