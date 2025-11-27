@@ -1,46 +1,37 @@
 #ifndef _HILL_SPEED_CONTROL_H_
 #define _HILL_SPEED_CONTROL_H_
 
+#include "Utils.h"
 #include "Peripheral.h"
 #include "HardwareControl.h"
 #include "Pid_Control.h"
 #include "Logger.h"
 
 #define MIN_SPEED 60
-#define MAX_SPEED 80
+#define MAX_SPEED 100
 
-byte motors[] = {LEFT_MOTOR, RIGHT_MOTOR};
-int lastTachoVal[DRIVE_MOTOR_COUNT];
-int tachoVal[DRIVE_MOTOR_COUNT];
-
-
-void hillSpeedControl_init() {
-
-    log_printSerial(StrCat("Drive Motor Count: ", NumToStr(DRIVE_MOTOR_COUNT), "\n"));
-    log_printSerial(StrCat("Speed range: ", NumToStr(MIN_SPEED), " - ", NumToStr(MAX_SPEED), "\n"));
-
-    for(unsigned int i = 0; i < DRIVE_MOTOR_COUNT; i++) {
-        lastTachoVal[i] = 0;
-        tachoVal[i] = 0;
-    }
-
-}
-
-
-void hillSpeedControl_internal_updateTachoVal() {
-
-    for(unsigned int i = 0; i < DRIVE_MOTOR_COUNT; i++) {
-        lastTachoVal[i] = tachoVal[i];
-        byte motor = motors[i];
-        tachoVal[i] = MotorBlockTachoCount(motor);
-    }
-
-}
+#define MIN_TACHO_SPEED 2
+#define MAX_TACHO_SPEED 6
 
 
 void hillSpeedControl_update() {
 
-    hillSpeedControl_internal_updateTachoVal();
+    int leftSpeed = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
+    int rightSpeed = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
+
+    //log_println(NumToStr(leftSpeed));
+
+    if(leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
+        pid_setBaseSpeed(MAX_SPEED);
+        //PlayTone(500, 1000);
+        log_println("Too slow");
+    }
+
+    if(leftSpeed > MAX_TACHO_SPEED || rightSpeed > MAX_TACHO_SPEED) {
+        pid_setBaseSpeed(MIN_SPEED);
+        //PlayTone(100, 1000);
+        log_println("Too fast");
+    }
 
 }
 

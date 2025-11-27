@@ -54,6 +54,11 @@ int pid_getRightPower() {
 }
 
 
+void pid_setBaseSpeed(int speed) {
+    base_speed = speed;
+}
+
+
 
 int limitDelta(int prev, int target, int maxDelta) {
     int d = target - prev;

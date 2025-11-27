@@ -9,6 +9,13 @@ if (v > hi) return hi;
 return v;
 }
 
+int fastAbs(int a) {
+    if(a < 0) {
+        return -a;
+    }
+    return a;
+}
+
 
 
 #endif

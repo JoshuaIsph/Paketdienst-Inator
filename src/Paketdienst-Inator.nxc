@@ -5,7 +5,7 @@
 #include "Barcode_Scanner.h"
 #include "HardwareControl.h"
 #include "LostRecovery.h"
-//#include "HillSpeedControl.h"
+#include "HillSpeedControl.h"
 
 
 
@@ -18,15 +18,7 @@ task main() {
 
   
   hardwareControl_init();
-  //hillSpeedControl_init();
 
-  /*
-    OnFwdRegPID(OUT_BC, 10, OUT_REGMODE_SPEED, PID_7, PID_1, PID_0);
-
-    while(true) {
-        Wait(10);
-    }
-*/
 
   int leftRaw = SensorValue(LEFT_SENSOR);
   int rightRaw = SensorValue(RIGHT_SENSOR);
@@ -41,7 +33,8 @@ task main() {
     rightRaw = SensorValue(RIGHT_SENSOR);
     middleRaw = SensorValue(MIDDLE_SENSOR);
 
-    //hillSpeedControl_update();
+    hillSpeedControl_update();
+
     /*
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
       lostRecovery_handleRecovery();
@@ -57,12 +50,8 @@ task main() {
 
 
     // --- APPLY POWER ---
-    //applyMotorPower(LEFT_MOTOR, appliedLeft);
-    //applyMotorPower(RIGHT_MOTOR, appliedRight);
-
-    // --- APPLY SPEED ---
-    applyMotorSpeed(LEFT_MOTOR, appliedLeft);
-    applyMotorSpeed(RIGHT_MOTOR, appliedRight);
+    applyMotorPower(LEFT_MOTOR, appliedLeft);
+    applyMotorPower(RIGHT_MOTOR, appliedRight);
 
     // --- BARCODE READING ---
     barcode_update(middleRaw);
