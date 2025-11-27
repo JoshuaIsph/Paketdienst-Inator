@@ -42,12 +42,12 @@ task main() {
     middleRaw = SensorValue(MIDDLE_SENSOR);
 
     //hillSpeedControl_update();
-    
+    /*
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
       lostRecovery_handleRecovery();
       continue;
     }
-
+    */
     // --- PID CONTROL ---
     pid_update(leftRaw, rightRaw);
 
@@ -61,8 +61,8 @@ task main() {
     //applyMotorPower(RIGHT_MOTOR, appliedRight);
 
     // --- APPLY SPEED ---
-    applyMotorSpeed(LEFT_MOTOR, appliedLeft);
-    applyMotorSpeed(RIGHT_MOTOR, appliedRight);
+    applyMotorPower(LEFT_MOTOR, appliedLeft);
+    applyMotorPower(RIGHT_MOTOR, appliedRight);
 
     // --- BARCODE READING ---
     barcode_update(middleRaw);

@@ -58,17 +58,28 @@ void hardwareControl_init() {
 
 
 
-#define MOTOR_P PID_7
+#define MOTOR_P PID_3
 #define MOTOR_I PID_1
 #define MOTOR_D PID_0
 
 // Applies motor speed and tries to hold it
 void applyMotorSpeed(int motorPort, int signedPower) {
-    int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
+    //int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
 
+    int signment = 1;
+    if(signedPower < 0) {
+        signment = -1;
+    }
+
+    float k = 60 / 100.0 * signedPower;
+    int p = k;
+    p = p * signment;
+
+    log_printSerial(StrCat("Speed: ", NumToStr(signedPower), "   p: ", NumToStr(p)));
     
     //OnFwdRegPID(OUT_BC, 10, OUT_REGMODE_SPEED, PID_7, PID_1, PID_0); // Test
 
+    
     if(p > 0) {
         OnFwdRegPID(motorPort, p, OUT_REGMODE_SPEED, MOTOR_P, MOTOR_I, MOTOR_D);
     } else if(p < 0) {
@@ -76,6 +87,18 @@ void applyMotorSpeed(int motorPort, int signedPower) {
     } else {
         Off(motorPort);
     }
+    
+
+
+/*
+    if(p > 0) {
+        OnFwdReg(motorPort, p, OUT_REGMODE_SPEED);
+    } else if(p < 0) {
+        OnRevReg(motorPort, p, OUT_REGMODE_SPEED);
+    } else {
+        Off(motorPort);
+    }
+        */
 }
 
 
