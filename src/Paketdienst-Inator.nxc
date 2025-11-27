@@ -61,8 +61,8 @@ task main() {
     //applyMotorPower(RIGHT_MOTOR, appliedRight);
 
     // --- APPLY SPEED ---
-    applyMotorPower(LEFT_MOTOR, appliedLeft);
-    applyMotorPower(RIGHT_MOTOR, appliedRight);
+    applyMotorSpeed(LEFT_MOTOR, appliedLeft);
+    applyMotorSpeed(RIGHT_MOTOR, appliedRight);
 
     // --- BARCODE READING ---
     barcode_update(middleRaw);

@@ -71,7 +71,7 @@ void applyMotorSpeed(int motorPort, int signedPower) {
         signment = -1;
     }
 
-    float k = 60 / 100.0 * signedPower;
+    float k = 40 / 100.0 * signedPower;
     int p = k;
     p = p * signment;
 
