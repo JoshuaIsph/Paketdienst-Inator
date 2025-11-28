@@ -6,7 +6,7 @@
 #include "Pid_Control.h"
 
 // --- CONFIGURATION ---
-#define LOST_COUNT_MAX 5 
+#define LOST_COUNT_MAX 100 
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20 
 
@@ -139,10 +139,12 @@ void lostRecovery_handleRecovery() {
         
 
         // Display Info
-        ClearScreen();
-        TextOut(0, 0, "SEARCHING...");
-        TextOut(0, 1, "Multiplier:");
-        NumOut(60, 1, recoveryMultiplier);
+        log_println("Searching...");
+        log_println(StrCat("Multiplier: ", NumToStr(recoveryMultiplier)));
+        //ClearScreen();
+        //TextOut(0, 0, "SEARCHING...");
+        //TextOut(0, 1, "Multiplier:");
+        //NumOut(60, 1, recoveryMultiplier);
 
         // Calculate Timings for this cycle
         int timeIndex = (recoveryMultiplier - 1); 
