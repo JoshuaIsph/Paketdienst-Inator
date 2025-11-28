@@ -35,12 +35,12 @@ task main() {
 
     hillSpeedControl_update();
 
-    /*
+    
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
       lostRecovery_handleRecovery();
       continue;
     }
-    */
+    
     // --- PID CONTROL ---
     pid_update(leftRaw, rightRaw);
 
