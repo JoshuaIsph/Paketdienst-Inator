@@ -16,6 +16,36 @@ int fastAbs(int a) {
     return a;
 }
 
+bool inRange(float a, float b, float range) {
+
+    float distance = a - b;
+
+    if(distance < 0) {
+        distance = -distance;
+    }
+
+    if(distance <= range) {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool insideThreshold(int a, int b, int threshold) {
+
+    int distance = a - b;
+
+    if(distance < 0) {
+        distance = -distance;
+    }
+
+    if(distance <= threshold) {
+        return true;
+    }
+
+    return false;
+}
 
 
 #endif
