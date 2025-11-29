@@ -13,8 +13,19 @@
 #define MIN_TACHO_SPEED 2
 #define MAX_TACHO_SPEED 6
 
+bool hillSpeedRegulation = true;
+
+
+void hillSpeedControl_enable(bool enable) {
+    hillSpeedRegulation = enable;
+}
+
 
 void hillSpeedControl_update() {
+
+    if(!hillSpeedRegulation) {
+        return;
+    }
 
     int leftSpeed = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
     int rightSpeed = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));

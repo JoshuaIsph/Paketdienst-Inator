@@ -2,10 +2,10 @@
 #include "Logger.h"
 #include "Peripheral.h"
 #include "Pid_Control.h"
-#include "Barcode_Scanner.h"
 #include "HardwareControl.h"
 #include "LostRecovery.h"
 #include "HillSpeedControl.h"
+#include "StateMachine.h"
 
 
 
@@ -23,24 +23,34 @@ task main() {
   int leftRaw = SensorValue(LEFT_SENSOR);
   int rightRaw = SensorValue(RIGHT_SENSOR);
   int middleRaw = SensorValue(BARCODE_SENSOR);
+  int wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
 
   pid_init(leftRaw, rightRaw);
 
   
-  while(true) {
-    // read sensors
+  bool running = true;
+
+  while(running) {
+
+    // --- SENSOR READINGS ---
     leftRaw = SensorValue(LEFT_SENSOR);
     rightRaw = SensorValue(RIGHT_SENSOR);
     middleRaw = SensorValue(MIDDLE_SENSOR);
+    wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
+    //log_println(NumToStr(wallDistance));
 
+
+    // --- HILL SPEED CONTROL ---
     hillSpeedControl_update();
 
     
+    // --- LOST RECOVERY ---
     if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
       lostRecovery_handleRecovery();
       continue;
     }
     
+
     // --- PID CONTROL ---
     pid_update(leftRaw, rightRaw);
 
@@ -48,17 +58,27 @@ task main() {
     int appliedRight = pid_getRightPower();
 
 
-
     // --- APPLY POWER ---
     applyMotorPower(LEFT_MOTOR, appliedLeft);
     applyMotorPower(RIGHT_MOTOR, appliedRight);
 
-    // --- BARCODE READING ---
-    barcode_update(middleRaw);
+
+    // --- STATE MACHINE CONTROL ---
+    bool stopLoop = stateMachine_update(leftRaw, middleRaw, rightRaw, wallDistance);
+
+    if(stopLoop) {
+        running = false;
+    }
 
 
     // --- Loop End ---
     Wait(LOOP_MS);
 
   }
+
+  applyMotorPower(LEFT_MOTOR, 0);
+  applyMotorPower(RIGHT_MOTOR, 0);
+
+  PlayTone(900, 1000);
+  Wait(1000);
 }
