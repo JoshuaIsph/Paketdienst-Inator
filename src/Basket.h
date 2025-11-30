@@ -51,6 +51,11 @@ void basket_internal_prepare() {
     log_println("Reset basket tacho");
 }
 
+void basket_init() {
+
+    basket_internal_prepare();
+}
+
 void basket_empty() {
 
     basket_internal_prepare();
