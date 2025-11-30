@@ -6,6 +6,7 @@
 #include "Pid_Control.h"
 #include "HillSpeedControl.h"
 #include "FinishLineDetection.h"
+#include "Basket.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10
 
@@ -15,7 +16,8 @@ enum State {
     RUNNING,
     BRICK,
     FINISH,
-    BASKET
+    BASKET,
+    HOLD
 };
 
 
@@ -85,7 +87,13 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
         }break;
 
         case BASKET: {
+            basket_empty();
+            currentState = HOLD;
+            return true;
+        }
 
+        case HOLD: {
+            // Stop process fallback layer
             return true;
         }
 
