@@ -9,8 +9,8 @@
 #include "Logger.h"
 
 
-#define MIN_TACHO_SPEED 2
-#define MAX_TACHO_SPEED 6
+#define MIN_TACHO_SPEED 7
+#define MAX_TACHO_SPEED 20
 
 bool hillSpeedRegulation = true;
 
@@ -20,14 +20,11 @@ void hillSpeedControl_enable(bool enable) {
 }
 
 
-void hillSpeedControl_update() {
+void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
 
     if(!hillSpeedRegulation) {
         return;
     }
-
-    int leftSpeed = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
-    int rightSpeed = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
 
     //log_println(NumToStr(leftSpeed));
 

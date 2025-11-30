@@ -33,7 +33,7 @@ void stateMachine_init() {
 * If robot should stop working, return value is true.
 * Some subroutines can keep the thread in this function until completion.
 */
-bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wallDistance) {
+bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wallDistance, int leftTacho, int rightTacho) {
 
 
 
@@ -66,14 +66,11 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
         case FINISH:{
             // Slowly approach basket and deliver package
-            
-            int leftSpeed = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
-            int rightSpeed = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
 
             static int lastDistance = 0;
             static int validationTimer = 0;
 
-            if(lastDistance == wallDistance && leftSpeed <= 0 && rightSpeed <= 0) {
+            if(lastDistance == wallDistance && leftTacho <= 0 && rightTacho <= 0) {
                 validationTimer++;
             } else {
                 validationTimer = 0;
