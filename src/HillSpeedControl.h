@@ -1,14 +1,13 @@
 #ifndef _HILL_SPEED_CONTROL_H_
 #define _HILL_SPEED_CONTROL_H_
 
+#include "Settings.h"
 #include "Utils.h"
 #include "Peripheral.h"
 #include "HardwareControl.h"
 #include "Pid_Control.h"
 #include "Logger.h"
 
-#define MIN_SPEED 60
-#define MAX_SPEED 100
 
 #define MIN_TACHO_SPEED 2
 #define MAX_TACHO_SPEED 6
@@ -39,7 +38,7 @@ void hillSpeedControl_update() {
     }
 
     if(leftSpeed > MAX_TACHO_SPEED || rightSpeed > MAX_TACHO_SPEED) {
-        pid_setBaseSpeed(MIN_SPEED);
+        pid_setBaseSpeed(TRAVEL_SPEED);
         //PlayTone(100, 1000);
         log_println("Too fast");
     }

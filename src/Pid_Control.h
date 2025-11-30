@@ -16,7 +16,7 @@ float kd = 0.02;
 const float DERIV_TAU = 0.04;
 
 // --- BASE SPEED ---
-int base_speed = 60; // 61
+int base_speed = TRAVEL_SPEED; // 61
 const int INTEGRAL_LIMIT = 30;
 
 // --- GLOBAL PID STATE ---

@@ -19,6 +19,7 @@ const int lineThreshold = 30;   // TODO adjust line detection threshold
 const int SPIN_TIMES[3] = {100, 150, 250}; // TODO adjust spin durations
 
 // --- LOST DETECTION ---
+bool lostRecoveryEnable = true;
 int lostCounter = 0;
 bool lost = false;
 
@@ -68,6 +69,11 @@ void lostRecovery_reset() {
 }
 
 void lostRecovery_handleRecovery() {
+
+    if(!lostRecoveryEnable) {
+        return;
+    }
+
     // reset PID
     integral = 0.0;
     derivative = 0.0;
@@ -137,6 +143,11 @@ void lostRecovery_handleRecovery() {
         lostRecovery_reset();
         lastToneTime = 0; // reset beep timer
     }
+}
+
+
+void lostRecovery_enable(bool enable) {
+    lostRecoveryEnable = enable;
 }
 
 #endif

@@ -1,17 +1,21 @@
 #ifndef _STATE_MACHINE_H_
 #define _STATE_MACHINE_H_
 
-
+#include "Settings.h"
+#include "Logger.h"
 #include "Pid_Control.h"
 #include "HillSpeedControl.h"
 #include "FinishLineDetection.h"
+
+#define BASKET_VALIDATION_TIMEOUT 10
 
 
 enum State {
     START,
     RUNNING,
     BRICK,
-    FINISH
+    FINISH,
+    BASKET
 };
 
 
@@ -37,6 +41,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
             // Approach wall and turn around
 
             currentState = RUNNING;
+            log_playStatusSound();
         }break;
 
         case RUNNING:{
@@ -47,6 +52,9 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
             if(detection_finishLineReached(lightLeft, lightMiddle, lightRight, wallDistance)) {
                 currentState = FINISH;
                 hillSpeedControl_enable(false);
+                lostRecovery_enable(false);
+                pid_setBaseSpeed(MIN_SPEED);
+                log_playStatusSound();
             }
         }break;
 
@@ -57,7 +65,28 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
         case FINISH:{
             // Slowly approach basket and deliver package
             
-            return true; // Placeholder
+            int leftSpeed = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
+            int rightSpeed = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
+
+            static int lastDistance = 0;
+            static int validationTimer = 0;
+
+            if(lastDistance == wallDistance && leftSpeed <= 0 && rightSpeed <= 0) {
+                validationTimer++;
+            } else {
+                validationTimer = 0;
+            }
+
+            if(validationTimer > BASKET_VALIDATION_TIMEOUT) {
+                currentState = BASKET;
+            }
+
+            lastDistance = wallDistance;
+        }break;
+
+        case BASKET: {
+
+            return true;
         }
 
     }
