@@ -5,7 +5,7 @@
 #define POWER_RANGE 100
 #define LOOP_MS 10
 
-#define MIN_SPEED 20
+#define MIN_SPEED 25
 #define TRAVEL_SPEED 60
 #define MAX_SPEED 100
 
