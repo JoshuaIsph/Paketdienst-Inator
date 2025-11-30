@@ -10,8 +10,7 @@
 #define ULTRA_SONIC_SENSOR  S3
 
 // Motors
-#define DRIVE_MOTOR_COUNT 2
-#define BALL_MOTOR   OUT_A
+#define BASKET_MOTOR   OUT_A
 #define LEFT_MOTOR   OUT_B
 #define RIGHT_MOTOR  OUT_C
 
