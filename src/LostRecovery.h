@@ -9,31 +9,20 @@
 // --- CONFIGURATION ---
 #define LOST_COUNT_MAX 40
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
-#define MAX_RECOVERY_MULTIPLIER 20 
+#define MAX_RECOVERY_MULTIPLIER 20
 #define RELATIVE_THRESHOLD 10
 
-const int FORWARD_POWER = 50; 
+const int FORWARD_POWER = 50;
 const int BACKWARD_POWER = -50;
-const int spinPower = 100;       
-const int lineThreshold = 27;   
+const int spinPower = 100;
 const int SPIN_TIMES[] = {200, 300, 400}; // Small, Medium, Large spins
 
 // --- LOST DETECTION ---
 bool lostRecoveryEnable = true;
 int lostCounter = 0;
 bool lost = false;
-int recoveryMultiplier = 1; 
+int recoveryMultiplier = 1;
 
-// --- DECLARATIONS ---
-/*
-bool lostRecovery_isLost(int l, int r, int m);
-bool lostRecovery_isLineVisible(int l, int r, int m);
-void lostRecovery_reset();
-bool checkLineOrWait(int duration); 
-bool attemptMove(int leftPwr, int rightPwr, int duration);
-bool performWiggleRoutine(int duration);
-void lostRecovery_handleRecovery();
-*/
 
 // =========================================================
 // 1. SENSOR & STATE HELPERS
@@ -56,13 +45,11 @@ bool lostRecovery_isLineVisible(int left, int right, int middle) {
     }
 
     return visible;
-    //return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
 }
 
 bool lostRecovery_isLost(int leftRaw, int rightRaw, int middleRaw) {
     
     // If NO sensors see the line
-    //if (leftRaw >= lineThreshold && rightRaw >= lineThreshold && middleRaw >= lineThreshold) {
     if(!lostRecovery_isLineVisible(leftRaw, rightRaw, middleRaw)) {
         lostCounter++;
     } else {
