@@ -36,14 +36,13 @@ void maneuver_rotateUntilLine() {
 
         if(lineFound) {
 
-            if(lr_equal) {
+            int avg = (lightLeft + lightRight) / 2;
+
+            if(lr_equal && !insideThreshold(avg, lightMiddle, DETECTION_THRESHOLD) && lightMiddle < avg
+                || !lr_equal && lightLeft < lightRight) {
+                
                 log_playNotifySound();
-                int avg = (lightLeft + lightRight) / 2;
-
-                if(!insideThreshold(avg, lightMiddle, DETECTION_THRESHOLD) && lightMiddle < avg) {
-                    rotate = false;
-                }
-
+                rotate = false;
             }
 
         } else {
