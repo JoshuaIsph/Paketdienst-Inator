@@ -9,7 +9,7 @@
 #include "Logger.h"
 
 
-#define MIN_TACHO_SPEED 7
+#define MIN_TACHO_SPEED 5
 #define MAX_TACHO_SPEED 20
 
 bool hillSpeedRegulation = true;
