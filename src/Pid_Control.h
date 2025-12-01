@@ -10,9 +10,9 @@
 #define MAX_DELTA_PER_LOOP 8
 
 // --- PID GAINS ---
-float kp = 4.75;
-float ki = 0.00;
-float kd = 0.02;
+float kp = 5.5; // 4.75
+float ki = -5.0; // 0.00 -408.5 // -5 -50
+float kd = 0.02; // 0.02
 const float DERIV_TAU = 0.04;
 
 // --- BASE SPEED ---
