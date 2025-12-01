@@ -142,6 +142,23 @@ void lostRecovery_handleRecovery() {
     // Start with multiplier 1
     recoveryMultiplier = 1;
 
+
+
+    // --- Did I miss the line? ---
+
+    /*
+    int time = 0;
+
+    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
+    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
+
+    while(time < 1000) {
+
+
+
+    }
+    */
+
     // --- THE INFINITE SEARCH LOOP ---
     // This loop runs forever until the line is found.
     while (true) {
