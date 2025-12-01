@@ -7,8 +7,10 @@
 #include "HillSpeedControl.h"
 #include "FinishLineDetection.h"
 #include "Basket.h"
+#include "Maneuver.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10
+#define START_WALL_DISTANCE 15
 
 
 enum State {
@@ -42,8 +44,14 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
         case START:{
             // Approach wall and turn around
 
-            currentState = RUNNING;
-            log_playStatusSound();
+            if(wallDistance < START_WALL_DISTANCE) {
+
+                maneuver_rotateUntilLine();
+                
+                currentState = RUNNING;
+                log_playStatusSound();    
+            }
+
         }break;
 
         case RUNNING:{
@@ -84,6 +92,8 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
         }break;
 
         case BASKET: {
+            applyMotorPower(LEFT_MOTOR, 0);
+            applyMotorPower(RIGHT_MOTOR, 0);
             basket_empty();
             currentState = HOLD;
             return true;
