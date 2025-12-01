@@ -1,6 +1,7 @@
 #ifndef _LOST_RECOVERY_H_
 #define _LOST_RECOVERY_H_
 
+#include "Utils.h"
 #include "Peripheral.h"
 #include "Settings.h"
 #include "Pid_Control.h"
@@ -9,6 +10,7 @@
 #define LOST_COUNT_MAX 40
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20 
+#define RELATIVE_THRESHOLD 10
 
 const int FORWARD_POWER = 50; 
 const int BACKWARD_POWER = -50;
@@ -39,13 +41,29 @@ void lostRecovery_handleRecovery();
 
 bool lostRecovery_isLineVisible(int left, int right, int middle) {
     // If ANY sensor sees black (value < threshold), line is visible
-    return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
+
+    bool visible = false;
+
+    int avg = (left + right) / 2;
+
+    if(insideThreshold(left, right, RELATIVE_THRESHOLD)) {
+
+        if(!insideThreshold(middle, avg, RELATIVE_THRESHOLD)) {
+            visible = true;
+        }
+    } else {
+        visible = true;
+    }
+
+    return visible;
+    //return (left < lineThreshold) || (right < lineThreshold) || (middle < lineThreshold);
 }
 
 bool lostRecovery_isLost(int leftRaw, int rightRaw, int middleRaw) {
     
     // If NO sensors see the line
-    if (leftRaw >= lineThreshold && rightRaw >= lineThreshold && middleRaw >= lineThreshold) {
+    //if (leftRaw >= lineThreshold && rightRaw >= lineThreshold && middleRaw >= lineThreshold) {
+    if(!lostRecovery_isLineVisible(leftRaw, rightRaw, middleRaw)) {
         lostCounter++;
     } else {
         lostCounter = 0; 
