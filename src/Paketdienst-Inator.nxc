@@ -15,77 +15,78 @@
 // =====================================================
 task main() {
 
-  log_init(); // SHOULD BE FIRST TO INITIALIZE!
+    log_init(); // SHOULD BE FIRST TO INITIALIZE!
 
   
-  hardwareControl_init();
+    hardwareControl_init();
 
-  basket_init();
+    basket_init();
 
-  int leftRaw = SensorValue(LEFT_SENSOR);
-  int rightRaw = SensorValue(RIGHT_SENSOR);
-  int middleRaw = SensorValue(BARCODE_SENSOR);
-  int wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
+    int leftRaw = SensorValue(LEFT_SENSOR);
+    int rightRaw = SensorValue(RIGHT_SENSOR);
+    int middleRaw = SensorValue(BARCODE_SENSOR);
+    int wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
 
-  int leftTacho = 0;
-  int rightTacho = 0;
+    int leftTacho = 0;
+    int rightTacho = 0;
 
-  pid_init(leftRaw, rightRaw);
+    pid_init(leftRaw, rightRaw);
 
   
-  bool running = true;
+    bool running = true;
 
-  while(running) {
+    while(running) {
 
-    // --- SENSOR READINGS ---
-    leftRaw = SensorValue(LEFT_SENSOR);
-    rightRaw = SensorValue(RIGHT_SENSOR);
-    middleRaw = SensorValue(MIDDLE_SENSOR);
-    wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
-    leftTacho = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
-    rightTacho = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
-    //log_println(NumToStr(wallDistance));
+        // --- SENSOR READINGS ---
+        leftRaw = SensorValue(LEFT_SENSOR);
+        rightRaw = SensorValue(RIGHT_SENSOR);
+        middleRaw = SensorValue(MIDDLE_SENSOR);
+        wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
+        leftTacho = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
+        rightTacho = fastAbs(MotorBlockTachoCount(RIGHT_MOTOR));
+        //log_println(NumToStr(wallDistance));
 
 
-    // --- HILL SPEED CONTROL ---
-    hillSpeedControl_update(leftTacho, rightTacho);
+        // --- HILL SPEED CONTROL ---
+        hillSpeedControl_update(leftTacho, rightTacho);
 
-    
-    // --- LOST RECOVERY ---
-    if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
-      lostRecovery_handleRecovery();
-      continue;
+        
+        // --- LOST RECOVERY ---
+        if(lostRecovery_isLost(leftRaw, rightRaw, middleRaw)) {
+            log_playAlarm();
+            lostRecovery_handleRecovery();
+            continue;
+        }
+        
+
+        // --- PID CONTROL ---
+        pid_update(leftRaw, rightRaw);
+
+        int appliedLeft = pid_getLeftPower();
+        int appliedRight = pid_getRightPower();
+
+
+        // --- APPLY POWER ---
+        applyMotorPower(LEFT_MOTOR, appliedLeft);
+        applyMotorPower(RIGHT_MOTOR, appliedRight);
+
+
+        // --- STATE MACHINE CONTROL ---
+        bool stopLoop = stateMachine_update(leftRaw, middleRaw, rightRaw, wallDistance, leftTacho, rightTacho);
+
+        if(stopLoop) {
+            running = false;
+        }
+
+
+        // --- Loop End ---
+        Wait(LOOP_MS);
+
     }
-    
 
-    // --- PID CONTROL ---
-    pid_update(leftRaw, rightRaw);
+    applyMotorPower(LEFT_MOTOR, 0);
+    applyMotorPower(RIGHT_MOTOR, 0);
 
-    int appliedLeft = pid_getLeftPower();
-    int appliedRight = pid_getRightPower();
-
-
-    // --- APPLY POWER ---
-    applyMotorPower(LEFT_MOTOR, appliedLeft);
-    applyMotorPower(RIGHT_MOTOR, appliedRight);
-
-
-    // --- STATE MACHINE CONTROL ---
-    bool stopLoop = stateMachine_update(leftRaw, middleRaw, rightRaw, wallDistance, leftTacho, rightTacho);
-
-    if(stopLoop) {
-        running = false;
-    }
-
-
-    // --- Loop End ---
-    Wait(LOOP_MS);
-
-  }
-
-  applyMotorPower(LEFT_MOTOR, 0);
-  applyMotorPower(RIGHT_MOTOR, 0);
-
-  PlayTone(900, 1000);
-  Wait(1000);
+    PlayTone(900, 1000);
+    Wait(1000);
 }

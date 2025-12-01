@@ -4,7 +4,7 @@
 #include "Utils.h"
 #include "Peripheral.h"
 #include "Settings.h"
-#include "logger.h"
+#include "Logger.h"
 
 
 
