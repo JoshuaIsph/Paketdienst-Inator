@@ -5,8 +5,10 @@
 #include "Peripheral.h"
 #include "Settings.h"
 #include "Pid_Control.h"
+#include "Maneuver.h"
 
 // --- CONFIGURATION ---
+#define REVERSE_PATH_FINDER_TIMEOUT 1000
 #define LOST_COUNT_MAX 40
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20
@@ -109,16 +111,56 @@ bool performWiggleRoutine(int duration) {
 
     log_println(StrCat("Wiggle: ", NumToStr(duration)));
 
-    if (attemptMove(spinPower, -spinPower, duration)) return true;
+    if (attemptMove(-spinPower, spinPower, duration)) return true;
     
     // 2. Return Center (Left)
-    if (attemptMove(-spinPower, spinPower, duration)) return true;
-    // 3. Look Left
-    if (attemptMove(-spinPower, spinPower, duration)) return true;
-    // 4. Return Center (Right)
     if (attemptMove(spinPower, -spinPower, duration)) return true;
+    // 3. Look Left
+    if (attemptMove(spinPower, -spinPower, duration)) return true;
+    // 4. Return Center (Right)
+    if (attemptMove(-spinPower, spinPower, duration)) return true;
     
     return false; // Completed wiggle without finding line
+}
+
+
+// Reverse to find lost path
+bool performReversePathFinder() {
+
+    const int timeout = REVERSE_PATH_FINDER_TIMEOUT / LOOP_MS;
+    int time = 0;
+
+    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
+    applyMotorPower(RIGHT_MOTOR, -TRAVEL_SPEED);
+
+    int left = 0;
+    int right = 0;
+
+    while(time < 1000) {
+        
+        left = Sensor(LEFT_SENSOR);
+        right = Sensor(RIGHT_SENSOR);
+        
+        if(!insideThreshold(left, right, RELATIVE_THRESHOLD)) {
+            
+            Direction direction;
+            if(left < right) {
+                direction = LEFT;
+            } else {
+                direction = RIGHT;
+            }
+
+            maneuver_rotateUntilLine(direction);
+
+            return true;
+        }
+        
+        time++;
+
+        Wait(LOOP_MS);
+    }
+
+    return false;
 }
 
 // =========================================================
@@ -145,19 +187,10 @@ void lostRecovery_handleRecovery() {
 
 
     // --- Did I miss the line? ---
-
-    /*
-    int time = 0;
-
-    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
-    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
-
-    while(time < 1000) {
-
-
-
+    if(performReversePathFinder()) {
+        return;
     }
-    */
+
 
     // --- THE INFINITE SEARCH LOOP ---
     // This loop runs forever until the line is found.
@@ -166,13 +199,10 @@ void lostRecovery_handleRecovery() {
         // Beep to indicate active recovery
         
 
-        // Display Info
+        // Log Info
         log_println("Searching...");
         log_println(StrCat("Multiplier: ", NumToStr(recoveryMultiplier)));
-        //ClearScreen();
-        //TextOut(0, 0, "SEARCHING...");
-        //TextOut(0, 1, "Multiplier:");
-        //NumOut(60, 1, recoveryMultiplier);
+        
 
         // Calculate Timings for this cycle
         int timeIndex = (recoveryMultiplier - 1); 
@@ -203,9 +233,8 @@ void lostRecovery_handleRecovery() {
         // --- CYCLE FAILED ---
         // If we reach here, the robot did the whole cross pattern and found nothing.
         // Increase the multiplier to search a wider area in the next loop.
-        recoveryMultiplier++;
-        if (recoveryMultiplier > MAX_RECOVERY_MULTIPLIER) {
-             recoveryMultiplier = MAX_RECOVERY_MULTIPLIER;
+        if(recoveryMultiplier <= MAX_RECOVERY_MULTIPLIER) {
+            recoveryMultiplier++;
         }
     }
 

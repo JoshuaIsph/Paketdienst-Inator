@@ -7,18 +7,41 @@
 #include "Utils.h"
 
 
+enum Direction {
+    LEFT,
+    RIGHT
+};
+
+
 #define DETECTION_THRESHOLD 10
 
 
-// Rotate right until line found
-void maneuver_rotateUntilLine() {
+// Rotate until line found
+// By default rotates left
+void maneuver_rotateUntilLine(const Direction direction = RIGHT) {
 
 
     bool rotate = true;
 
     
-    applyMotorPower(LEFT_MOTOR, MAX_SPEED);
-    applyMotorPower(RIGHT_MOTOR, -MAX_SPEED);
+    {
+        const int speed = MAX_SPEED;
+
+        int left = 0;
+        int right = 0;
+
+        if(direction == RIGHT) {
+            left = speed;
+            right = -speed;
+        } else {
+            left = -speed;
+            right = speed;
+        }
+        
+        applyMotorPower(LEFT_MOTOR, left);
+        applyMotorPower(RIGHT_MOTOR, right);
+    }
+
 
     int lightLeft = 0;
     int lightRight = 0;
@@ -39,7 +62,8 @@ void maneuver_rotateUntilLine() {
             int avg = (lightLeft + lightRight) / 2;
 
             if(lr_equal && !insideThreshold(avg, lightMiddle, DETECTION_THRESHOLD) && lightMiddle < avg
-                || !lr_equal && lightLeft < lightRight) {
+                || !lr_equal
+                && (direction == RIGHT && lightLeft < lightRight || direction == LEFT && lightRight < lightLeft)) {
                 
                 log_playNotifySound();
                 rotate = false;
@@ -48,7 +72,7 @@ void maneuver_rotateUntilLine() {
         } else {
             if(!lr_equal) {
 
-                if(lightRight < lightLeft) {
+                if(direction == RIGHT && lightRight < lightLeft || direction == LEFT && lightLeft < lightRight) {
                     lineFound = true;
                     log_playStatusSound();
                 }
