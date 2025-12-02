@@ -28,7 +28,7 @@
     #if RIGHT_MOTOR == OUT_B
         #define LR_MOTOR OUT_AB
     #elif RIGHT_MOTOR == OUT_C
-        #define LR_MOTOR = OUT_AC
+        #define LR_MOTOR OUT_AC
     #else
         #error ERROR_RIGHT_MOTOR_CHOICE
     #endif
