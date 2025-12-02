@@ -135,7 +135,7 @@ bool performReversePathFinder() {
     int left = 0;
     int right = 0;
 
-    while(time < 1000) {
+    while(time < timeout) {
         
         left = Sensor(LEFT_SENSOR);
         right = Sensor(RIGHT_SENSOR);
