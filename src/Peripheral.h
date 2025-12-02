@@ -13,5 +13,6 @@
 #define BASKET_MOTOR   OUT_A
 #define LEFT_MOTOR   OUT_B
 #define RIGHT_MOTOR  OUT_C
+#define LR_MOTOR OUT_BC
 
 #endif

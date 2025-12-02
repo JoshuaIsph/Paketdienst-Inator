@@ -130,8 +130,7 @@ bool performReversePathFinder() {
     const int timeout = REVERSE_PATH_FINDER_TIMEOUT / LOOP_MS;
     int time = 0;
 
-    applyMotorPower(LEFT_MOTOR, -TRAVEL_SPEED);
-    applyMotorPower(RIGHT_MOTOR, -TRAVEL_SPEED);
+    applySynchronizedMotorPower(LR_MOTOR, -TRAVEL_SPEED);
 
     int left = 0;
     int right = 0;
