@@ -28,10 +28,20 @@ void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
 
     //log_println(NumToStr(leftSpeed));
 
-    if(leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
-        pid_setBaseSpeed(MAX_SPEED);
-        //PlayTone(500, 1000);
-        log_println("Too slow");
+    int leftPowerSet = MotorPower(LEFT_MOTOR);
+    int rightPowerSet =  MotorPower(RIGHT_MOTOR);
+
+    //log_println(StrCat("Left: ", NumToStr(leftPowerSet)));
+    //log_println(StrCat("Right: ", NumToStr(rightPowerSet)));
+
+    const static int min_speed_threshold = (MIN_SPEED + TRAVEL_SPEED) / 2;
+
+    if(leftPowerSet >= min_speed_threshold && rightPowerSet >= min_speed_threshold) {
+        if(leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
+            pid_setBaseSpeed(MAX_SPEED);
+            //PlayTone(500, 1000);
+            log_println("Too slow");
+        }
     }
 
     if(leftSpeed > MAX_TACHO_SPEED || rightSpeed > MAX_TACHO_SPEED) {
