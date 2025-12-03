@@ -76,15 +76,4 @@ void applyMotorPower(int motorPort, int signedPower) {
 }
 
 
-void applySynchronizedMotorPower(int motors, int signedPower, int turnRatio = 0) {
-
-    int power = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
-    power = fastAbs(power);
-
-    if(signedPower > 0) OnFwdSync(motors, power, turnRatio);
-    else if(signedPower < 0) OnRevSync(motors, power, turnRatio);
-    else Off(motors);
-
-}
-
 #endif

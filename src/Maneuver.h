@@ -20,6 +20,7 @@ enum Direction {
 // By default rotates left
 void maneuver_rotateUntilLine(const Direction direction = RIGHT) {
 
+    log_println("Rotate until line");
 
     bool rotate = true;
 
