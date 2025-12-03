@@ -9,9 +9,15 @@
 #define BARCODE_SENSOR      MIDDLE_SENSOR
 #define ULTRA_SONIC_SENSOR  S3
 
-#define OUT_A 0
-#define OUT_B 1
-#define OUT_C 2
+
+// Left sees white as 42%
+// Right sees white as 38%
+// Multiplying factor on right sensor to equalize because sensors were out of tolerance 
+// Factor is calculated as followed: 1 + (1 - (RightLightValue / LeftLightValue))
+// => Factor = 2 - RightWhiteLightValue / LeftWhiteLightValue
+// Editing calculated factor by hand for fine tuning
+#define SENSOR_EQUALIZE_FACTOR 1.094
+
 
 // Motors
 #define BASKET_MOTOR    OUT_A

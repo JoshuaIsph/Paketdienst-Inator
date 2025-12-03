@@ -40,7 +40,7 @@ task main() {
 
         // --- SENSOR READINGS ---
         leftRaw = SensorValue(LEFT_SENSOR);
-        rightRaw = SensorValue(RIGHT_SENSOR);
+        rightRaw = SensorValue(RIGHT_SENSOR) * SENSOR_EQUALIZE_FACTOR;
         middleRaw = SensorValue(MIDDLE_SENSOR);
         wallDistance = SensorUS(ULTRA_SONIC_SENSOR);
         leftTacho = fastAbs(MotorBlockTachoCount(LEFT_MOTOR));
