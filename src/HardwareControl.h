@@ -16,15 +16,15 @@ void hardwareControl_internal_selfTest() {
 
     if(SensorValue(LEFT_SENSOR) == 0) {
         errorFlag = 1;
-        log_println("Left Light Sensor");
+        log_println("Left Light Sensor", true);
     }
     if(SensorValue(RIGHT_SENSOR) == 0) {
         errorFlag = 1;
-        log_println("Right Light Sensor");
+        log_println("Right Light Sensor", true);
     }
     if(SensorValue(MIDDLE_SENSOR) == 0) {
         errorFlag = 1;
-        log_println("Middle Light Sensor");
+        log_println("Middle Light Sensor", true);
     }
     unsigned int attempt = 0;
     const unsigned int attemptCount = 3;
@@ -36,13 +36,14 @@ void hardwareControl_internal_selfTest() {
     }
     if(attempt >= (attemptCount - 1)) {
         errorFlag = 1;
-        log_println("Ultra Sonic Sensor");
+        log_println("Ultra Sonic Sensor", true);
     }
 
 
     if(errorFlag) {
 
-        log_println("Not responding");
+        log_println("Not responding", true);
+        log_println("Continue?", true);
         log_playAlarm();
         log_waitForUserInput();
     }
