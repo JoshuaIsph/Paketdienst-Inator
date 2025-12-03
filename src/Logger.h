@@ -36,6 +36,8 @@ struct StringContainer {
 StringContainer printBuffer[LINE_COUNT];
 int printBufferStart = LINE_COUNT - 1;
 
+bool log_enableLogger = true;
+
 
 void log_init() {
 
@@ -95,9 +97,13 @@ void log_intern_printBuffer() {
 
 
 // Wrapper function to print on screen and serial monitor
-void log_println(const string& msg) {
+void log_println(const string& msg, bool veryImportant = false) {
 
     serial_println(msg);
+
+    if(!log_enableLogger && !veryImportant) {
+        return;
+    }
 
     StringContainer newLine;
     newLine.text = msg;
@@ -153,6 +159,11 @@ void log_playAlarm() {
 void log_waitForUserInput() {
 
     while(!ButtonPressed(BTNCENTER, false));
+}
+
+
+void log_enable(bool enable) {
+    log_enableLogger = enable;
 }
 
 

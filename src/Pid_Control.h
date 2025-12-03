@@ -11,7 +11,7 @@
 
 // --- PID GAINS ---
 float kp = 11; // 4.75 //9.5
-float ki = 0.01; // 0.00 -408.5 // -5 -50
+float ki = 0.0; // 0.00 -408.5 // -5 -50
 float kd = 0.032; // 0.02
 const float DERIV_TAU = 0.04;
 
