@@ -8,8 +8,8 @@
 #include "Maneuver.h"
 
 // --- CONFIGURATION ---
-#define REVERSE_PATH_FINDER_TIMEOUT 1000
-#define LOST_COUNT_MAX 40
+#define REVERSE_PATH_FINDER_TIMEOUT 3000
+#define LOST_COUNT_MAX 30
 #define FORWARD_BACKWARD_WAIT_MS 200 // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20
 #define RELATIVE_THRESHOLD 10
@@ -127,10 +127,14 @@ bool performWiggleRoutine(int duration) {
 // Reverse to find lost path
 bool performReversePathFinder() {
 
+    log_playNotifySound();
+
     const int timeout = REVERSE_PATH_FINDER_TIMEOUT / LOOP_MS;
     int time = 0;
 
-    applySynchronizedMotorPower(LR_MOTOR, -TRAVEL_SPEED);
+    log_println("Reverse path finding");
+
+    OnRevSync(LR_MOTOR, TRAVEL_SPEED, 0);
 
     int left = 0;
     int right = 0;
