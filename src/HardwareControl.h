@@ -10,6 +10,15 @@
 
 
 // Test for hardware failure on startup
+/**
+ * Hardware selftest.
+ * Tests if all sensors are connected and working properly.
+ * Prints error message and holds thread if one sensor is
+ * not working as expected.
+ * 
+ * @note Light Sensors are expected to return values > 0
+ * @note Ultra Sonic Sensor is expected to return values > 0
+ */
 void hardwareControl_internal_selfTest() {
 
     byte errorFlag = 0;
@@ -51,7 +60,9 @@ void hardwareControl_internal_selfTest() {
 }
 
 
-// configure sensors
+/**
+ * Initialize and configure ports for its corresponding sensor types.
+ */
 void hardwareControl_init() {
     
     SetSensorLight(LEFT_SENSOR, true);
@@ -65,7 +76,12 @@ void hardwareControl_init() {
 }
 
 
-// Just applies power to motor
+/**
+ * Applies power to the motor.
+ * 
+ * @param motorPort Port of motor to apply power
+ * @param power Power in range of -100 to 100 to apply
+ */
 void applyMotorPower(int motorPort, int signedPower) {
     int p = clampInt(signedPower, -POWER_RANGE, POWER_RANGE);
 
@@ -76,3 +92,4 @@ void applyMotorPower(int motorPort, int signedPower) {
 }
 
 #endif
+// _HARDWARE_CONTROL_H_

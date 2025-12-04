@@ -9,17 +9,34 @@
 #include "Logger.h"
 
 
-#define MIN_TACHO_SPEED 5
-#define MAX_TACHO_SPEED 20
+#define MIN_TACHO_SPEED 5   // Min tacho threshold to boost power limit
+#define MAX_TACHO_SPEED 20  // Max tacho threshold to lower power limit
 
-bool hillSpeedRegulation = true;
+bool hillSpeedRegulation = true;    // Variable to enable hill speed regulation
 
 
+/**
+ * Function to enable or disable hill speed regulation.
+ * 
+ * @param enable Set true to enable. Set false to disable.
+ */
 void hillSpeedControl_enable(bool enable) {
     hillSpeedRegulation = enable;
 }
 
 
+/**
+ * Updates hill speed regulation control.
+ * Controls the speedlimit of pid control, to get over the hill.
+ * 
+ * If motors sense tacho values lower than MIN_TACHO_SPEEd, but higher speed is expected,
+ * speed limit will be increased to MAX_SPEED.
+ * If motors sense tacho values higher than MAX_TACHO_SPEED,
+ * speed limit will be lowerd to TAVEL_SPEED.
+ * 
+ * @param leftSpeed Current raw tacho value of left motor
+ * @param rightSpeed Current raw tacho value fo right motor
+ */
 void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
 
     if(!hillSpeedRegulation) {
@@ -45,3 +62,4 @@ void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
 
 
 #endif
+// _HILL_SPEED_CONTROL_H_

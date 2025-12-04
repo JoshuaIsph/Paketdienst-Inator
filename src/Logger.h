@@ -2,18 +2,20 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
-#define SERIAL_MONITOR 1
-#define ENABLE_SOUND 1
+#define SERIAL_MONITOR 1    // Enable serial monitor
+#define ENABLE_SOUND 1      // Enable logging sound
 
 #if SERIAL_MONITOR
 #include "SerialMonitor.h"
 #endif
 
+// Display properties
 #define LETTER_WIDTH 5
 #define LETTER_HEIGHT 8
 #define COLUMN_COUNT DISPLAY_HEIGHT/LETTER_HEIGHT
 #define LINE_COUNT DISPLAY_WIDTH/LETTER_WIDTH
 
+// Sound properties
 #define STATUS_TONE_FREQ 475
 #define STATUS_TONE_DURATION 90
 
@@ -28,15 +30,26 @@
 #define ALARM_TONE_DURATION 2
 
 
-// Only because of nxc compiler limitations...
+
+/**
+ * Container for strings of unknown length for arrays.
+ * Only exists because of nxc compiler limitations...
+ * 
+ * NXC won't allow to create an array of strings of unknown size.
+ * But allows this...
+ */
 struct StringContainer {
     string text;
 };
 
-StringContainer printBuffer[LINE_COUNT];
-int printBufferStart = LINE_COUNT - 1;
+StringContainer printBuffer[LINE_COUNT];    // Buffer for string displayed.
+int printBufferStart = LINE_COUNT - 1;      // Starting index of buffer
 
 
+/**
+ * Initialize logger and setup serial monitor if present.
+ * Set bluetooth channel to 0 for string prints.
+ */
 void log_init() {
 
     #if SERIAL_MONITOR
@@ -53,8 +66,12 @@ void log_init() {
 }
 
 
-// Print to serial monitor
-void log_printSerial(const string& data) {
+/**
+ * Print string to serial monitor.
+ * 
+ * @param data String to print to serial monitor
+ */
+ void log_printSerial(const string& data) {
 
     #if SERIAL_MONITOR
     serial_println(data);
@@ -62,7 +79,9 @@ void log_printSerial(const string& data) {
 }
 
 
-// Internal function to shift line buffer
+/**
+ * Internal function to shift line buffer
+ */
 void log_intern_shiftBuffer() {
 
     if(printBufferStart <= 0) {
@@ -73,10 +92,19 @@ void log_intern_shiftBuffer() {
 }
 
 
+/**
+ * getter function for start index of print buffer.
+ * 
+ * @returns Starting index of print buffer
+ */
 int log_intern_getCurrentLineIndex() {
    return printBufferStart;
 }
 
+
+/**
+ * Prints whole line buffer on display.
+ */
 void log_intern_printBuffer() {
 
     int index = printBufferStart;
@@ -94,7 +122,11 @@ void log_intern_printBuffer() {
 }
 
 
-// Wrapper function to print on screen and serial monitor
+/**
+ * Print string on screen and serial monitor, if present.
+ * 
+ * @param msg String to print
+ */
 void log_println(const string& msg) {
 
     serial_println(msg);
@@ -111,15 +143,19 @@ void log_println(const string& msg) {
 }
 
 
-
-// Play sound for state change of state machine
+/**
+ * Plays sound for state changes of state machine.
+ */
 void log_playStatusSound() {
     #if ENABLE_SOUND
     PlayTone(STATUS_TONE_FREQ, STATUS_TONE_DURATION); Wait(STATUS_TONE_DURATION);
     #endif
 }
 
-// Play notify sound for important debug message on screen
+
+/**
+ * Plays notify sound for important debug messages
+ */
 void log_playNotifySound() {
     #if ENABLE_SOUND
     PlayTone(NOTIFY_TONE_FREQ_1, NOTIFY_TONE_DURATION * 2); Wait(NOTIFY_TONE_DURATION);
@@ -127,7 +163,11 @@ void log_playNotifySound() {
     #endif
 }
 
-// Internal function
+
+/**
+ * Internal function.
+ * Plays alarm tone sequence.
+ */
 void log_internal_alarmTone() {
     #if ENABLE_SOUND
     PlayTone(ALARM_FREQ_1, ALARM_TONE_DURATION * 3); Wait(ALARM_TONE_DURATION);
@@ -136,7 +176,10 @@ void log_internal_alarmTone() {
     #endif
 }
 
-// Play sound for any runtime error
+
+/**
+ * Plays alarm sound for errors.
+ */
 void log_playAlarm() {
 
     for(unsigned int i = 0; i < 2; i++) {
@@ -149,7 +192,9 @@ void log_playAlarm() {
 }
 
 
-// Returns if user pressed orange button
+/**
+ * Holds current thread until user pressed the centered button of the nxt controller.
+ */
 void log_waitForUserInput() {
 
     while(!ButtonPressed(BTNCENTER, false));
@@ -157,3 +202,4 @@ void log_waitForUserInput() {
 
 
 #endif
+// _LOGGER_H_

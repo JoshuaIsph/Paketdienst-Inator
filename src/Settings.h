@@ -2,17 +2,18 @@
 #define _SETTINGS_H_
 
 
-#define POWER_RANGE 100
-#define LOOP_MS 10
+#define POWER_RANGE 100 // Max power to use
+#define LOOP_MS 10      // Time to let main loop sleep
 
-#define MIN_SPEED 25
-#define TRAVEL_SPEED 70 // 55
-#define MAX_SPEED 100
+#define MIN_SPEED 25    // Minimum speed to hold
+#define TRAVEL_SPEED 70 // Avarage speed to hold
+#define MAX_SPEED 100   // Maximum speed to hold
 
-const float update_time = 0.01; // seconds
+const float update_time = LOOP_MS/1000; // 0.01 // seconds
 
 
 
 
 
 #endif
+// _SETTINGS_H_

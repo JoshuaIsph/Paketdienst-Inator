@@ -5,12 +5,22 @@
 byte bluetoothChannel = 0;
 
 
+/**
+ * Set bluetooth channel to send bytes.
+ * 
+ * @param channel Bluetooth channel (0 to 3)
+ */
 void serial_setChannel(byte channel) {
 
     bluetoothChannel = channel;
 }
 
 
+/**
+ * Sends string to serial monitor.
+ * 
+ * @param data String to send
+ */
 void serial_println(const string& data) {
 
     string line = StrCat(data, "\n");
@@ -33,3 +43,4 @@ void serial_println(const string& data) {
 
 
 #endif
+// _SERIAL_MONITOR_H_

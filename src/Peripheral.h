@@ -1,5 +1,6 @@
 #ifndef _PERIPHERAL_H_
 #define _PERIPHERAL_H_
+
 // Connected peripheral devices
 
 // Sensors
@@ -14,4 +15,6 @@
 #define LEFT_MOTOR   OUT_B
 #define RIGHT_MOTOR  OUT_C
 
+
 #endif
+// _PERIPHERALS_H_

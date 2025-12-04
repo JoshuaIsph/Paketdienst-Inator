@@ -9,10 +9,13 @@
 #include "Basket.h"
 #include "Maneuver.h"
 
-#define BASKET_VALIDATION_TIMEOUT 10
-#define START_WALL_DISTANCE 15
+#define BASKET_VALIDATION_TIMEOUT 10    // Validation timeout to find finish line
+#define START_WALL_DISTANCE 15          // Distance of wall to starting line in cm. Rotate if this distance is reached
 
 
+/**
+ * States of state machine.
+ */
 enum State {
     START,
     RUNNING,
@@ -23,18 +26,32 @@ enum State {
 };
 
 
-State currentState;
+State currentState; // Current state of state machine
 
 
+/**
+ * Initialize state machine.
+ * Actually just setting current state to START.
+ */
 void stateMachine_init() {
     currentState = START;
 }
 
-/*
-* Update state machine and returns false if robot should continue the work.
-* If robot should stop working, return value is true.
-* Some subroutines can keep the thread in this function until completion.
-*/
+
+/**
+ * Update state machine and returns false if robot should continue the work.
+ * If robot should stop working, return value is true.
+ * Some subroutines can keep the thread in this function until completion.
+ * 
+ * @param lightLeft current raw value of left light sensor
+ * @param lightMiddle current raw value of middle light sensor
+ * @param lightRight current raw value of right light sensor
+ * @param wallDistance current distance read by ultra sonic sensor
+ * @param leftTacho current tacho value of left motor
+ * @param rightTacho current tacho value of right motor
+ * 
+ * @returns true if robot should stop working. false if robot should continue work
+ */
 bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wallDistance, int leftTacho, int rightTacho) {
 
 
@@ -112,3 +129,4 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
 
 #endif
+// _STATE_MACHINE_H_

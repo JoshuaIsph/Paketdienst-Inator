@@ -3,14 +3,24 @@
 
 
 #include "Utils.h"
-#include "Logger.h"
 
-#define DETECTION_THRESHOLD 10
-#define WALL_FINISHLINE_DISTANCE 17
-#define FINISHLINE_VALIDATE_TIMEOUT 20 // 20
-
+#define DETECTION_THRESHOLD 10          // Threshold for difference between light sensors
+#define WALL_FINISHLINE_DISTANCE 17     // Distance to detect wall at finish line in cm
+#define FINISHLINE_VALIDATE_TIMEOUT 20  // Timeout for detection if potential finishline was found
 
 
+
+/**
+ * Calculates if finishline was found with currently
+ * and previously given values.
+ * 
+ * @param lightLeft Current raw value of left light sensor
+ * @param lightMiddle Current raw value of middle light sensor
+ * @param lightRight Current raw value of right light sensor
+ * @param wallDistance Current distance to wall in cm
+ * 
+ * @returns true if finish line was detected
+ */
 bool detection_finishLineReached(int lightLeft, int lightMiddle, int lightRight, int wallDistance) {
 
     static int validateTime = 0;
@@ -49,3 +59,4 @@ bool detection_finishLineReached(int lightLeft, int lightMiddle, int lightRight,
 
 
 #endif
+// _FINISH_LINE_DETECTION_H_

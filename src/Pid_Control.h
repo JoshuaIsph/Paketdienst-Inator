@@ -34,6 +34,12 @@ int pid_leftPower = 0;
 int pid_rightPower = 0;
 
 
+/**
+ * Initialize pid control.
+ * 
+ * @param leftRaw Current raw value of left light sensor
+ * @param rightRaw Current raw value of right light sensor
+ */
 void pid_init(int leftRaw, int rightRaw) {
 
     float initError = (leftRaw - rightRaw) / ERROR_SCALE;
@@ -44,16 +50,31 @@ void pid_init(int leftRaw, int rightRaw) {
 }
 
 
+/**
+ * Get calculated power for left motor.
+ * 
+ * @return Left motor power
+ */
 int pid_getLeftPower() {
     return pid_leftPower;
 }
 
 
+/**
+ * Get calculated power for right motor.
+ * 
+ * @return Right motor power
+ */
 int pid_getRightPower() {
     return pid_rightPower;
 }
 
 
+/**
+ * Sets base speed.
+ * 
+ * @param speed New base speed
+ */
 void pid_setBaseSpeed(int speed) {
     base_speed = speed;
 }
@@ -67,6 +88,13 @@ int limitDelta(int prev, int target, int maxDelta) {
     return prev + d;
 }
 
+
+/**
+ * Updates calculation of pid control.
+ * 
+ * @param leftRaw Raw value of left light sensor
+ * @param rightRaw Raw value of right light sensor
+ */
 void pid_update(int leftRaw, int rightRaw) {
 
     float error = (leftRaw - rightRaw) / ERROR_SCALE;
@@ -103,4 +131,6 @@ void pid_update(int leftRaw, int rightRaw) {
     lastError = error;
 }
 
+
 #endif
+// _PID_CONTROL_H_
