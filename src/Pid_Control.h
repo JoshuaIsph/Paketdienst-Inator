@@ -10,7 +10,7 @@
 #define MAX_DELTA_PER_LOOP 8
 
 // --- PID GAINS ---
-float kp = 6.2; // 11
+float kp = 6.46; // 11
 float ki = 0.0; // 0.00
 float kd = 0.19; // 0.032
 const float DERIV_TAU = 0.04;
