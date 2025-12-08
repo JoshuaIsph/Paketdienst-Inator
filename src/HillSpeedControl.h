@@ -9,7 +9,7 @@
 #include "Logger.h"
 
 
-#define MIN_TACHO_SPEED 5
+#define MIN_TACHO_SPEED 9
 #define MAX_TACHO_SPEED 20
 
 bool hillSpeedRegulation = true;
@@ -34,7 +34,7 @@ void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
     //log_println(StrCat("Left: ", NumToStr(leftPowerSet)));
     //log_println(StrCat("Right: ", NumToStr(rightPowerSet)));
 
-    const static int min_speed_threshold = (MIN_SPEED + TRAVEL_SPEED) / 2;
+    const static int min_speed_threshold = MIN_SPEED; //(MIN_SPEED + TRAVEL_SPEED) / 2;
 
     if(leftPowerSet >= min_speed_threshold && rightPowerSet >= min_speed_threshold) {
         if(leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
