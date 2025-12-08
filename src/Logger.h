@@ -129,7 +129,7 @@ void log_intern_printBuffer() {
  * 
  * @param msg String to print
  */
-void log_println(const string& msg) {
+void log_println(const string& msg, bool veryImportant = false) {
 
     serial_println(msg);
 
