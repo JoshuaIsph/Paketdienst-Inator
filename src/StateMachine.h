@@ -8,6 +8,7 @@
 #include "FinishLineDetection.h"
 #include "Basket.h"
 #include "Maneuver.h"
+#include "BarrierHandler.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10    // Validation timeout to find finish line
 #define START_WALL_DISTANCE 15          // Distance of wall to starting line in cm. Rotate if this distance is reached
@@ -83,6 +84,8 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
                 pid_setBaseSpeed(MIN_SPEED);
                 log_playStatusSound();
             }
+
+            barrierHandler_detectAndHandleBarrier(wallDistance);
         }break;
 
         case BRICK:{
