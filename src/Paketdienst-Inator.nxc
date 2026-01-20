@@ -33,6 +33,7 @@ task main() {
 
     pid_init(leftRaw, rightRaw);
 
+    stateMachine_init();
   
     bool running = true;
 
