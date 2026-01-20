@@ -8,6 +8,7 @@
 #include "FinishLineDetection.h"
 #include "Basket.h"
 #include "Maneuver.h"
+#include "WallPushMission.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10    // Validation timeout to find finish line
 #define START_WALL_DISTANCE 15          // Distance of wall to starting line in cm. Rotate if this distance is reached
@@ -34,7 +35,7 @@ State currentState; // Current state of state machine
  * Actually just setting current state to START.
  */
 void stateMachine_init() {
-    currentState = START;
+    currentState = BRICK;
 }
 
 
@@ -87,6 +88,9 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
         case BRICK:{
             // Kick brick from table
+            executeWallPushMission();
+            log_playStatusSound();
+            currentState = RUNNING;
         }break;
 
         case FINISH:{

@@ -141,7 +141,7 @@ void pushWallUntilGone() {
     Wait(300);
     // push
     while (true) {
-        int ultra_sonic = SensorValue(ULTRA_SONIC_SENSOR);
+        int ultra_sonic = SensorUS(ULTRA_SONIC_SENSOR);
         if (ultra_sonic > 0 && ultra_sonic >= WALL_GONE_CM) break; // wall moved
         if (ultra_sonic == 0) {
             // no reading -> give a short retreat and re-try a bit then stop if persists

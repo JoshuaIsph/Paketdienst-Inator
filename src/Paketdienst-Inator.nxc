@@ -23,6 +23,8 @@ task main() {
 
     basket_init();
 
+    stateMachine_init();
+
     int leftRaw = SensorValue(LEFT_SENSOR);
     int rightRaw = SensorValue(RIGHT_SENSOR);
     int middleRaw = SensorValue(BARCODE_SENSOR);
