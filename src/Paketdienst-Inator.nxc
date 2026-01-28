@@ -6,8 +6,7 @@
 #include "LostRecovery.h"
 #include "HillSpeedControl.h"
 #include "StateMachine.h"
-#include "Basket.h"
-#include "Maneuver.h"
+
 
 
 
@@ -21,7 +20,6 @@ task main() {
   
     hardwareControl_init();
 
-    basket_init();
 
     int leftRaw = SensorValue(LEFT_SENSOR);
     int rightRaw = SensorValue(RIGHT_SENSOR);

@@ -8,6 +8,7 @@
 #include "FinishLineDetection.h"
 #include "Basket.h"
 #include "Maneuver.h"
+#include "BarcodeReader.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10    // Validation timeout to find finish line
 #define START_WALL_DISTANCE 15          // Distance of wall to starting line in cm. Rotate if this distance is reached
@@ -34,7 +35,11 @@ State currentState; // Current state of state machine
  * Actually just setting current state to START.
  */
 void stateMachine_init() {
-    currentState = START;
+    currentState = RUNNING;
+
+    
+    basket_init();
+    barcodeReader_init();
 }
 
 
@@ -83,10 +88,29 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
                 pid_setBaseSpeed(MIN_SPEED);
                 log_playStatusSound();
             }
+
+            // Scan barcode
+            BarcodeCommand command = barcodeReader_update(lightLeft, lightRight, lightMiddle);
+            if(command == PUSH_BLOCK) {
+                barcodeScanner_setEnable(false); // Only push once
+                currentState = BRICK;
+            }
+
         }break;
 
         case BRICK:{
             // Kick brick from table
+            
+            log_println("PUSH BLOCK");
+            log_playNotifySound();
+            Wait(5);
+            log_playNotifySound();
+            Wait(5);
+            log_playNotifySound();
+
+            // Do thingus
+
+            currentState = RUNNING;
         }break;
 
         case FINISH:{
