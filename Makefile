@@ -2,7 +2,7 @@
 TARGET = src/Paketdienst-Inator.nxc
 INCLUDE_PATH = src
 OUTPUT = Paketdienst-Inator
-OPTIMIZATION_LEVEL = 5 # Level 1 - 2   |   With newest compiler: 1 - 5
+OPTIMIZATION_LEVEL = 2 # Level 1 - 2   |   With newest compiler: 1 - 5
 
 
 # ----- Path for OS -----
