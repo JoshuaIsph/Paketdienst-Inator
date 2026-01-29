@@ -9,10 +9,11 @@
 #include "Logger.h"
 
 
-#define MIN_TACHO_SPEED 7
-#define MAX_TACHO_SPEED 20
+#define MIN_TACHO_SPEED 7  // 7
+#define MAX_TACHO_SPEED 15 // 20
 
 bool hillSpeedRegulation = true;    // Variable to enable hill speed regulation
+
 
 
 /**
@@ -51,18 +52,26 @@ void hillSpeedControl_update(int leftSpeed, int rightSpeed) {
     //log_println(StrCat("Left: ", NumToStr(leftPowerSet)));
     //log_println(StrCat("Right: ", NumToStr(rightPowerSet)));
 
+    // Prevent cpu overload, mainly due to printing
+    static bool tooSlow = true;
+    static bool tooFast = true;
+
     const static int min_speed_threshold = (MIN_SPEED + TRAVEL_SPEED) / 2;
 
     if(leftPowerSet >= min_speed_threshold && rightPowerSet >= min_speed_threshold) {
-        if(leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
+        if(tooSlow && leftSpeed < MIN_TACHO_SPEED && rightSpeed < MIN_TACHO_SPEED) {
             pid_setBaseSpeed(MAX_SPEED);
+            tooFast = true;
+            tooSlow = false;
             //PlayTone(500, 1000);
             log_println("Too slow");
         }
     }
 
-    if(leftSpeed > MAX_TACHO_SPEED || rightSpeed > MAX_TACHO_SPEED) {
+    if(tooFast && (leftSpeed > MAX_TACHO_SPEED || rightSpeed > MAX_TACHO_SPEED)) {
         pid_setBaseSpeed(TRAVEL_SPEED);
+        tooFast = false;
+        tooSlow = true;
         //PlayTone(100, 1000);
         log_println("Too fast");
     }
