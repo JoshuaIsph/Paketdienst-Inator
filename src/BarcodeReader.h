@@ -6,7 +6,7 @@
 #include "Logger.h"
 
 
-#define BARCODE_SCAN_TIMEOUT 4
+#define BARCODE_SCAN_TIMEOUT 5
 #define RELATIVE_THRESHOLD 10
 
 
