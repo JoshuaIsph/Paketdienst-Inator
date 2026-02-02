@@ -35,7 +35,11 @@ task main() {
   
     bool running = true;
 
+    long timeStart = 0; // Timer increments every ms. HOW SLOW COULD A BE TIMER?!
+
     while(running) {
+
+        timeStart = CurrentTick();
 
         // --- SENSOR READINGS ---
         leftRaw = SensorValue(LEFT_SENSOR);
@@ -80,7 +84,9 @@ task main() {
 
 
         // --- Loop End ---
-        Wait(LOOP_MS);
+        //Wait(LOOP_MS);
+        while(CurrentTick() - timeStart < LOOP_MS); // Constant timing
+        // Loop time independent from program as long as cpu is not overloaded.
 
     }
 
