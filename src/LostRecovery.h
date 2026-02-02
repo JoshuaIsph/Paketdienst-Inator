@@ -66,10 +66,15 @@ bool lostRecovery_isLineVisible(int left, int right, int middle) {
  * @param rightRaw Raw light value of right sensor
  * @param middleRaw Raw light value of middle sensor
  * 
- * @returns true if line was lost
+ * @returns true if line was lost.
+ * @returns always returns false if lost recovery is disabled
  */
 bool lostRecovery_isLost(int leftRaw, int rightRaw, int middleRaw) {
     
+    if(!lostRecoveryEnable) {
+        return false;
+    }
+
     // If NO sensors see the line
     if(!lostRecovery_isLineVisible(leftRaw, rightRaw, middleRaw)) {
         lostCounter++;

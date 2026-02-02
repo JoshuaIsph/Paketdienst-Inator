@@ -9,6 +9,7 @@
 #include "Basket.h"
 #include "Maneuver.h"
 #include "BarcodeReader.h"
+#include "Demolition.h"
 
 #define BASKET_VALIDATION_TIMEOUT 10    // Validation timeout to find finish line
 #define START_WALL_DISTANCE 15          // Distance of wall to starting line in cm. Rotate if this distance is reached
@@ -21,6 +22,7 @@ enum State {
     START,
     RUNNING,
     BRICK,
+    RETURN_PATH,
     FINISH,
     BASKET,
     HOLD
@@ -94,23 +96,37 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
             if(command == PUSH_BLOCK) {
                 barcodeScanner_setEnable(false); // Only push once
                 currentState = BRICK;
+                lostRecovery_enable(false); // Disable for push mission
+
+                demolition_turn();
+
+                log_println("PUSH BLOCK");
+                log_playNotifySound();
+                Wait(5);
+                log_playNotifySound();
+                Wait(5);
+                log_playNotifySound();
+
             }
 
         }break;
 
         case BRICK:{
             // Kick brick from table
-            
-            log_println("PUSH BLOCK");
-            log_playNotifySound();
-            Wait(5);
-            log_playNotifySound();
-            Wait(5);
-            log_playNotifySound();
+            if(demolition_attack(wallDistance)) {
+                currentState = RETURN_PATH;
+            }
 
-            // Do thingus
+        }break;
 
-            currentState = RUNNING;
+        case RETURN_PATH:{
+
+            if(demolition_return(lightLeft, lightMiddle, lightRight)) {
+
+                lostRecovery_enable(true); // Enable for original mission
+                currentState = RUNNING;
+            }
+
         }break;
 
         case FINISH:{
