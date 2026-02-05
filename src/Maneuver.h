@@ -18,7 +18,7 @@ enum Direction {
 
 // Rotate until line found
 // By default rotates left
-void maneuver_rotateUntilLine(const Direction direction = RIGHT) {
+void maneuver_rotateUntilLine(const Direction direction = RIGHT, bool counterDirection = true) {
 
     log_println("Rotate until line");
 
@@ -33,9 +33,13 @@ void maneuver_rotateUntilLine(const Direction direction = RIGHT) {
 
         if(direction == RIGHT) {
             left = speed;
-            right = -speed;
+            if(counterDirection) {
+                right = -speed;
+            }
         } else {
-            left = -speed;
+            if(counterDirection) {
+                left = -speed;
+            }
             right = speed;
         }
         

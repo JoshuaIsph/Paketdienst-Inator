@@ -29,8 +29,9 @@ void barrierHandler_init() {
     handleBarrier = true;
 
     for(unsigned int i = 0; i < SMOOTHING_SAMPLE_COUNT; i++) {
-        barrierHandler_distanceSamples[i] = 0;
+        barrierHandler_distanceSamples[i] = 255;
     }
+    barrierHandler_currentIndex = 0;
 }
 
 
