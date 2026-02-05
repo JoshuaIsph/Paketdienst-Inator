@@ -8,7 +8,7 @@
 
 #define BARRIER_STOP_DISTANCE 20    // CM
 #define BARRIER_HANDLER_DELAY 100   // MS
-#define SMOOTHING_SAMPLE_COUNT 2
+#define SMOOTHING_SAMPLE_COUNT 3
 
 bool handleBarrier = true;
 
