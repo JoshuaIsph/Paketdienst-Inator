@@ -9,7 +9,7 @@
 
 // --- CONFIGURATION ---
 #define REVERSE_PATH_FINDER_TIMEOUT 3000    // Time to reverse
-#define LOST_COUNT_MAX 14                   // Time until lost recovery triggers
+#define LOST_COUNT_MAX 21                   // Time until lost recovery triggers
 #define FORWARD_BACKWARD_WAIT_MS 200        // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20          // Max intensyfier
 #define RELATIVE_THRESHOLD 10               // Threshold between light sensors
@@ -24,6 +24,9 @@ bool lostRecoveryEnable = true;
 int lostCounter = 0;
 bool lost = false;
 int recoveryMultiplier = 1;
+
+// --- Memory ---
+Direction lastDirection;
 
 
 // =========================================================
@@ -80,6 +83,16 @@ bool lostRecovery_isLost(int leftRaw, int rightRaw, int middleRaw) {
         lostCounter++;
     } else {
         lostCounter = 0; 
+    }
+
+    if(!insideThreshold(leftRaw, rightRaw, RELATIVE_THRESHOLD)) {
+
+        if(leftRaw < rightRaw) {
+            lastDirection = LEFT;
+        } else {
+            lastDirection = RIGHT;
+        }
+
     }
     
     lost = (lostCounter > LOST_COUNT_MAX);
@@ -193,22 +206,26 @@ bool performReversePathFinder() {
 
     int left = 0;
     int right = 0;
+    int middle = 0;
 
     while(time < timeout) {
         
         left = Sensor(LEFT_SENSOR);
         right = Sensor(RIGHT_SENSOR);
+        middle = Sensor(MIDDLE_SENSOR);
+        int avg = (left + right) / 2;
         
-        if(!insideThreshold(left, right, RELATIVE_THRESHOLD)) {
-            
+        if(!insideThreshold(left, right, RELATIVE_THRESHOLD) || !insideThreshold(avg, middle, RELATIVE_THRESHOLD)) {
+            /*
             Direction direction;
             if(left < right) {
                 direction = LEFT;
             } else {
                 direction = RIGHT;
             }
+            */
 
-            maneuver_rotateUntilLine(direction);
+            maneuver_rotateUntilLine(lastDirection, false);
 
             return true;
         }
