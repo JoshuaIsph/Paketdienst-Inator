@@ -39,10 +39,17 @@ State currentState; // Current state of state machine
  */
 void stateMachine_init() {
     currentState = RUNNING;
-
     
     basket_init();
     barcodeReader_init();
+
+    /*
+    //---DELETE----------------------
+    currentState = BRICK;
+    lostRecovery_enable(false);
+    hillSpeedControl_enable(false);
+    //-------------------------------
+    */
 }
 
 
@@ -116,7 +123,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
         case BRICK:{
             // Kick brick from table
-            if(demolition_attack(wallDistance)) {
+            if(demolition_attackT(leftTacho, rightTacho)) {
                 currentState = RETURN_PATH;
             }
 
