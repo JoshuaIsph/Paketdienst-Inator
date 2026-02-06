@@ -6,14 +6,17 @@
 #include "HardwareControl.h"
 #include "Maneuver.h"
 #include "Logger.h"
+#include "LostRecovery.h"
 
 
 #define DEMOLITION_DISTANCE 10
-#define RELATIVE_THRESHOLD_DEMOLITION RELATIVE_THRESHOLD
 #define DEMOLITION_REVERSE_TIMEOUT 200
 #define DEMOLITION_RETURN_FORWARD_TIME 500
-#define DEMOLITION_RETURN_BACKWARD_TIME 1550
-#define DEMOLITION_RETURN_GAP_TIME 150
+#define DEMOLITION_RETURN_BACKWARD_TIME 800
+#define DEMOLITION_RETURN_GAP_TIME 140
+
+#define RELATIVE_THRESHOLD_DEMOLITION 10
+#define DEMO_SMOOTHING 5
 
 
 bool demolition_modeEnable = true;
@@ -79,8 +82,10 @@ void returnToPath() {
         Wait(10);
     }
 
-    applyMotorPower(LEFT_MOTOR, MIN_SPEED);
-    applyMotorPower(RIGHT_MOTOR, MIN_SPEED);
+    //applyMotorPower(LEFT_MOTOR, MIN_SPEED);
+    //applyMotorPower(RIGHT_MOTOR, MIN_SPEED);
+
+    OnFwdSync(LR_MOTOR, MIN_SPEED, 0);
 
     Wait(DEMOLITION_RETURN_FORWARD_TIME);
 
@@ -133,8 +138,6 @@ bool demolition_attackS(int lightLeft, int lightMiddle, int lightRight) {
     return false;
 }
 
-
-#define DEMO_SMOOTHING 5
 
 int sampleBuffer[DEMO_SMOOTHING];
 int demo_index = 0;
@@ -251,6 +254,10 @@ bool demolition_return(int lightLeft, int lightMiddle, int lightRight) {
 
         Wait(DEMOLITION_RETURN_GAP_TIME);
         maneuver_rotateUntilLine(RIGHT, false);
+        
+        OnFwdSync(LR_MOTOR, TRAVEL_SPEED, 0);
+        Wait(200);
+        lostRecovery_reset();
         return true;
     }
 
