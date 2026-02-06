@@ -123,7 +123,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
         case BRICK:{
             // Kick brick from table
-            if(demolition_attackT(leftTacho, rightTacho)) {
+            if(demolition_attackS(lightLeft, lightMiddle, lightRight)) {
                 currentState = RETURN_PATH;
             }
 
