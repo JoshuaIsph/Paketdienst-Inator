@@ -4,10 +4,11 @@
 #include "Peripheral.h"
 #include "Utils.h"
 #include "Logger.h"
+#include "Settings.h"
 
 
-#define BARCODE_SCAN_TIMEOUT 5
-#define RELATIVE_THRESHOLD 10
+#define BARCODE_SCAN_TIMEOUT 7
+#define RELATIVE_THRESHOLD_BARCODE 6
 
 
 bool barcodeScanner_enable = true;
@@ -56,7 +57,7 @@ BarcodeCommand barcodeReader_update(int leftLightVal, int rightLightVal, int sca
         highVal = leftLightVal;
     }
 
-    if(insideThreshold(highVal, scannerLightVal, RELATIVE_THRESHOLD)) {
+    if(insideThreshold(highVal, scannerLightVal, RELATIVE_THRESHOLD_BARCODE)) {
         // White bar
         if(!barState) {
             barState = true;

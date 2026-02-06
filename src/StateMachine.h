@@ -38,18 +38,21 @@ State currentState; // Current state of state machine
  * Actually just setting current state to START.
  */
 void stateMachine_init() {
-    currentState = RUNNING;
+    currentState = START;
     
     basket_init();
     barcodeReader_init();
+    demolition_init();
 
     /*
     //---DELETE----------------------
     currentState = BRICK;
     lostRecovery_enable(false);
-    hillSpeedControl_enable(false);
+    //hillSpeedControl_enable(false);
     //-------------------------------
     */
+
+    currentState = RUNNING;
 }
 
 
@@ -107,6 +110,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
                 barcodeScanner_setEnable(false); // Only push once
                 currentState = BRICK;
                 lostRecovery_enable(false); // Disable for push mission
+                
 
                 demolition_turn();
 
@@ -123,7 +127,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
 
         case BRICK:{
             // Kick brick from table
-            if(demolition_attackS(lightLeft, lightMiddle, lightRight)) {
+            if(demolition_attackML(lightMiddle)) {
                 currentState = RETURN_PATH;
             }
 

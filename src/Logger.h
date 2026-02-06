@@ -45,7 +45,7 @@ struct StringContainer {
 StringContainer printBuffer[LINE_COUNT];    // Buffer for string displayed.
 int printBufferStart = LINE_COUNT - 1;      // Starting index of buffer
 
-bool log_enableLogger = true;
+bool log_enableLogger = false;
 
 
 /**

@@ -6,9 +6,10 @@
 #include "Logger.h"
 
 
-#define BARRIER_STOP_DISTANCE 20    // CM
+#define BARRIER_STOP_DISTANCE 21    // CM
 #define BARRIER_HANDLER_DELAY 100   // MS
-#define SMOOTHING_SAMPLE_COUNT 3
+#define SMOOTHING_SAMPLE_COUNT 5
+#define US_THRESHOLD 5
 
 bool handleBarrier = true;
 
@@ -107,7 +108,7 @@ void barrierHandler_detectAndHandleBarrier(int distance) {
     log_println("Barrier stop");
 
     // Wait
-    while(avgDistance <= BARRIER_STOP_DISTANCE) {
+    while(insideThreshold(avgDistance, BARRIER_STOP_DISTANCE, US_THRESHOLD) || avgDistance <= BARRIER_STOP_DISTANCE) {
 
         barrierHandler_internal_addSample(SensorUS(ULTRA_SONIC_SENSOR));
         avgDistance = barrierHandler_internal_calcSmoothedDistance();
