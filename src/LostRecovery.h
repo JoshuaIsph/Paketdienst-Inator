@@ -9,7 +9,7 @@
 
 // --- CONFIGURATION ---
 #define REVERSE_PATH_FINDER_TIMEOUT 3000    // Time to reverse
-#define LOST_COUNT_MAX 19                   // Time until lost recovery triggers
+#define LOST_COUNT_MAX 9                   // Time until lost recovery triggers
 #define FORWARD_BACKWARD_WAIT_MS 200        // Base time for movement
 #define MAX_RECOVERY_MULTIPLIER 20          // Max intensyfier
 //#define RELATIVE_THRESHOLD 8               // Threshold between light sensors
