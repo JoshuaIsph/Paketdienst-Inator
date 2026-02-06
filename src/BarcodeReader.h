@@ -7,8 +7,8 @@
 #include "Settings.h"
 
 
-#define BARCODE_SCAN_TIMEOUT 7
-#define RELATIVE_THRESHOLD_BARCODE 6
+#define BARCODE_SCAN_TIMEOUT 12  // 7
+#define RELATIVE_THRESHOLD_BARCODE 12
 
 
 bool barcodeScanner_enable = true;
@@ -90,6 +90,7 @@ BarcodeCommand barcodeReader_update(int leftLightVal, int rightLightVal, int sca
     if(timeSinceChange > BARCODE_SCAN_TIMEOUT) {
         timeSinceChange = 0;
 
+        log_playNotifySound();
         log_println(StrCat("Barcode: ", NumToStr(barCount)));
 
         if(barCount == 3) {
@@ -98,6 +99,72 @@ BarcodeCommand barcodeReader_update(int leftLightVal, int rightLightVal, int sca
 
         barCount = 0;
     }
+
+    return command;
+}
+
+
+BarcodeCommand barcodeReader_read(int leftLightVal, int rightLightVal, int scannerLightVal) {
+
+    static int time = 0;
+    static bool scan = false;
+    static int barCount = 0;
+    static bool low = false;
+
+    if(!barcodeScanner_enable) {
+        return false;
+    }
+
+    int max = leftLightVal;
+
+    if(rightLightVal > max) {
+        max = rightLightVal;
+    }
+
+    bool inside = insideThreshold(scannerLightVal, max, RELATIVE_THRESHOLD_BARCODE);
+
+    BarcodeCommand command = NONE;
+
+    if(scan) {
+
+        time++;
+
+        if(time < BARCODE_SCAN_TIMEOUT) {
+            if(low && inside) {
+                barCount++;
+                time = 0;
+                low = false;
+            } else if(!inside && scannerLightVal < max) {
+                low = true;
+            }
+        } else {
+
+            if(barCount == 3) {
+                command = PUSH_BLOCK;
+            }
+
+            scan = false;
+            time = 0;
+            barCount = 0;
+            low = true;
+        }
+
+        if(barCount == 3) {
+            command = PUSH_BLOCK;
+        }
+        
+
+    } else {
+        if(inside) {
+            log_playNotifySound();
+            log_printSerial("Scan barcode");
+            scan = true;
+            time = 0;
+            low = false;
+            barCount++;
+        }
+    }
+
 
     return command;
 }

@@ -52,7 +52,7 @@ void stateMachine_init() {
     //-------------------------------
     */
 
-    currentState = RUNNING;
+    //currentState = RUNNING;
 }
 
 
@@ -105,7 +105,7 @@ bool stateMachine_update(int lightLeft, int lightMiddle, int lightRight, int wal
             barrierHandler_detectAndHandleBarrier(wallDistance);
 
             // Scan barcode
-            BarcodeCommand command = barcodeReader_update(lightLeft, lightRight, lightMiddle);
+            BarcodeCommand command = barcodeReader_read(lightLeft, lightRight, lightMiddle);
             if(command == PUSH_BLOCK) {
                 barcodeScanner_setEnable(false); // Only push once
                 currentState = BRICK;
