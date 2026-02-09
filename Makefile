@@ -1,7 +1,7 @@
 
 TARGET = src/Paketdienst-Inator.nxc
 INCLUDE_PATH = src
-OUTPUT = Paketdienst-Inator
+OUTPUT = Paketdienst-Inator # EmergencyPlan
 OPTIMIZATION_LEVEL = 5 # Level 1 - 2   |   With newest compiler: 1 - 5
 
 

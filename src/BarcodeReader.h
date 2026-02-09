@@ -9,9 +9,9 @@
 
 #define BARCODE_SCAN_TIMEOUT 12  // 7
 #define RELATIVE_THRESHOLD_BARCODE 12
+#define BARCODE_READER_ENABLE true
 
-
-bool barcodeScanner_enable = true;
+bool barcodeScanner_enable = BARCODE_READER_ENABLE;
 
 enum BarcodeCommand {
     NONE,
@@ -24,7 +24,7 @@ enum BarcodeCommand {
  * Initializes barcode reader.
  */
 void barcodeReader_init() {
-    barcodeScanner_enable = true;
+    barcodeScanner_enable = BARCODE_READER_ENABLE;
 }
 
 
@@ -90,8 +90,8 @@ BarcodeCommand barcodeReader_update(int leftLightVal, int rightLightVal, int sca
     if(timeSinceChange > BARCODE_SCAN_TIMEOUT) {
         timeSinceChange = 0;
 
-        log_playNotifySound();
-        log_println(StrCat("Barcode: ", NumToStr(barCount)));
+        //log_playNotifySound();
+        //log_println(StrCat("Barcode: ", NumToStr(barCount)));
 
         if(barCount == 3) {
             command = PUSH_BLOCK;
