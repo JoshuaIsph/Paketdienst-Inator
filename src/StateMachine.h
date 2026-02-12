@@ -43,6 +43,7 @@ void stateMachine_init() {
     basket_init();
     barcodeReader_init();
     demolition_init();
+    barrierHandler_init();
 
     /*
     //---DELETE----------------------
